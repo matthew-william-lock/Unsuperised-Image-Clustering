@@ -1,4 +1,5 @@
-#include <iostream>
+#include "Cluster.h"
+#include "PPM.h"
 
 bool is_number(const std::string& s)
 {
@@ -19,7 +20,7 @@ int main(int argc, char* argv[]){
         cout<<"usage: clusterer: error: too few arguments"<<endl;
         return 1;
     }
-    else if (argc>2 && argc < 9){
+    else if (argc>1 && argc < 9){
 
         for (size_t i = 2; i < argc; i++)
         {
@@ -58,6 +59,22 @@ int main(int argc, char* argv[]){
         cout<<"Output file: "<<outputFile<<endl;
         cout<<"Number of clusters: "<<clusters<<endl;
         cout<<"Width of histogram feature: "<<hgramWidth<<endl;
+        
+        // START OF PROGRAM -----------------------------------------------------------------------------------
+        cout<<endl<<"Starting clusterer"<<endl;
+
+        // LCKMAT002::PPM file("../Gradient_Numbers_PPMS/eight_10.ppm");
+        LCKMAT002::Cluster cluster = LCKMAT002::Cluster();
+        cout<<endl<<"===============Reading Images==============="<<endl;
+        if(!cluster.readImages("Gradient_Numbers_PPMS")){
+            cout<<"Error reading images"<<endl;
+            return 1;
+        }
+        cout<<"============================================"<<endl;
+        
+
+
+        // END OF PROGRAM -------------------------------------------------------------------------------------
         
         
     }
