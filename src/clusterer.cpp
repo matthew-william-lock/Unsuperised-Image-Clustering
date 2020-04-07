@@ -11,7 +11,7 @@ bool is_number(const std::string& s)
 int main(int argc, char* argv[]){
     using namespace std;
 
-    string outputFile;
+    std::string outputFile=std::string();
     int clusters = 10;
     int hgramWidth = 1;
 
@@ -65,13 +65,53 @@ int main(int argc, char* argv[]){
 
         // LCKMAT002::PPM file("../Gradient_Numbers_PPMS/eight_10.ppm");
         LCKMAT002::Cluster cluster = LCKMAT002::Cluster();
-        cout<<endl<<"===============Reading Images==============="<<endl;
+        cout<<endl<<"===============Creating Cluster and Reading Images==============="<<endl;
         if(!cluster.readImages("Gradient_Numbers_PPMS")){
             cout<<"Error reading images"<<endl;
             return 1;
         }
-        cout<<"============================================"<<endl;
+        cluster.setBinSize(hgramWidth);
+        cout<<"======================================================================="<<endl;
+
+        cout<<endl<<"===============Creating Image Feature==============="<<endl;
+        if (!cluster.generateHistograms(PIXEL_INTENSITY_TAG)){
+            cout<<"Error generating image feature"<<endl;
+            return 1;
+        }      
+        cout<<"========================================================="<<endl;
+
+        cout<<endl<<"===============Initialising Clusters==============="<<endl;
+        if (!cluster.generateHistograms(PIXEL_INTENSITY_TAG,clusters)){
+            cout<<"Error generating clusters"<<endl;
+            return 1;
+        }      
+        cout<<"================================================="<<endl;
+
+        cout<<endl<<"===============Iterating Through Clusters==============="<<endl;
+        cout<<endl;  
+        int it = 0;
+
+        cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        // The first iteration should incur any moves 
+        if (!cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
+            cout<<"Error generating clusters"<<endl;
+            return 1;
+        }
+        cout<<"----------"<<endl<<endl;
         
+        it++;
+        // Iterartions there after might move from one set to another  
+        cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        while (cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
+            it++;
+            cout<<"----------"<<endl<<endl;
+            cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        }  
+        cout<<"----------"<<endl<<endl;
+
+        cout<<"Number of iterations:"<<it<<endl;
+
+        cout<<"================================================="<<endl;       
 
 
         // END OF PROGRAM -------------------------------------------------------------------------------------

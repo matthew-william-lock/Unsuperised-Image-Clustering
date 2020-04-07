@@ -2,6 +2,8 @@
 
 namespace LCKMAT002 {
 
+    using namespace std;
+
     PPM::PPM(const std::string &filename){
         using namespace std;
         fileName=filename;
@@ -67,6 +69,7 @@ namespace LCKMAT002 {
         // binaryFile<<"255"<<endl;        
 
         // Read image data
+        
         image=new PPMPixel *[nrows];
         for (size_t y = 0; y < nrows; y++){
             PPMPixel * row= new PPMPixel [ncols];
@@ -85,57 +88,93 @@ namespace LCKMAT002 {
             }
             image[y]=row; 
         }   
-
         fileStream.close();
         cout<<"File closed"<<endl<<endl; 
 
     }
 
-    PPM::~PPM(){
-        // std::cout<<"Destruct "<<fileName<<std::endl;
-        if (image!=nullptr){
-            for (size_t y = 0; y < nrows; y++){
-                if (image[y]!=nullptr){
-                    delete [] image[y]; 
-                }              
-            }
-            delete [] image;
-        }
-        
-        
-        // free(image); 
+    int PPM::getNrows(){
+        return nrows;
+    };
+
+    int PPM::getNcols(){
+        return ncols;
+    };
+
+    char PPM::getR(int y, int x){
+        return image[y][x].red;
+    }
+
+    char PPM::getG(int y, int x){
+        return image[y][x].green;
+    }
+
+    char PPM::getB(int y, int x){
+        return image[y][x].blue;
+    }
+
+    // Return black and white pixel at value X and Y of image
+    unsigned char PPM::getBWPixel(int y, int x){
+        return 0.21 * image[y][x].red + 0.72 * image[y][x].green + 0.07 * image[y][x].blue;
+    }
+
+    std::string PPM::getFilename(){
+        return fileName;
     }
 
     // Special Members ===========================================================================================================
 
+    // Destructor   
+    PPM::~PPM(){
+        // std::cout<<"Destruct "<<fileName<<std::endl;
+        // cout<<"address desrtuct " <<this->image<<endl;
+        // cout<<"check"<<endl;
+        if (image==nullptr){
+            // cout<<"Null"<<endl;
+            delete[] image;
+        }
+        else{
+            // cout<<"Not null"<<endl;
+            for (size_t y = 0; y < nrows; y++){
+                // if (image[y]!=nullptr){
+                    // cout<<"inner address "<<image[y]<<endl;
+                    delete [] image[y]; 
+                // }              
+            }
+            delete [] image;
+        }
+        // }
+    }
+
     // Move Constructor
     PPM::PPM(PPM&& other) noexcept{
-        *this = std::move(other);  // invoke move assignment operator
-        other.fileName=fileName;
-        other.image=image;
-        other.ncols=ncols;
-        other.nrows=nrows;
+        // cout<<"Move Constrctor start"<<endl;
+        // *this = std::move(other);  // invoke move assignment operator
+        this->fileName=other.fileName;
+        this->ncols=other.ncols;
+        this->nrows=other.nrows;
+
+        // cout<<"move construvtor "<<this->nrows<<endl;
 
         this->image=new PPMPixel*[this->ncols];
         for (size_t y = 0; y < this->nrows; y++){
             PPMPixel * row = new PPMPixel[ncols];
             for (size_t x = 0; x < this->ncols; x++)
             {
-                row[x].red=other.image[y][x].red;
-                row[x].green=other.image[y][x].green;
-                row[x].blue=other.image[y][x].blue;
+            row[x].red=other.image[y][x].red;
+            row[x].green=other.image[y][x].green;
+            row[x].blue=other.image[y][x].blue;
             }
             this->image[y]=row;
-            other.image[y]=nullptr;
         }
-        other.image=nullptr;       
-
-        // cout<<"Move Constrctor"<<endl;
+        // other.image=nullptr;
+        // cout<<"Move construct done"<<endl;
 
     }
 
     // Copy Assignment Operator
     PPM PPM::operator=(const PPM &other ){
+        // cout<<"Copy assignment operator"<<endl;
         this->fileName=other.fileName;
         this->image=other.image;
         this->ncols=other.ncols;
@@ -159,39 +198,57 @@ namespace LCKMAT002 {
             }
             this->image[y]=row;
         }       
-
-        // cout<<"Copy assignment operator"<<endl;
     }
 
     // Move Assignment
     PPM& PPM::operator=(PPM&& other) noexcept{
+        // cout<<"Move assignment"<<endl;
         if (this != &other) {
             this->fileName=other.fileName;
             this->ncols=other.ncols;
             this->nrows=other.nrows;
 
-            this->image=new PPMPixel*[this->ncols];
-            for (size_t y = 0; y < this->nrows; y++){
-                PPMPixel * row = new PPMPixel[ncols];
-                for (size_t x = 0; x < this->ncols; x++)
-                {
-                row[x].red=other.image[y][x].red;
-                row[x].green=other.image[y][x].green;
-                row[x].blue=other.image[y][x].blue;
-                }
-                this->image[y]=row;
-                other.image[y]=nullptr;
-            }     
+            // this->image = other.image;
+            // cout<<"Filename "<<this->fileName<<endl;
+            // cout<<"old lhs "<<&*this->image<<" old rhs "<<&*other.image<<endl;
+            // std::swap(this->image, other.image);
+             for (size_t y = 0; y < this->nrows; y++){
+                this->image[y]=other.image[y];     
+                other.image[y]=nullptr;                          
+            }
+            this->image=other.image;
             other.image=nullptr;
-        }
 
-        // cout<<"Move assignment"<<endl;
+            // cout<<"new lhs "<<&*this->image<<" new rhs "<<&*other.image<<endl;
+            // other.image = nullptr;
+
+
+            // cout<<"cleared address "<<other.image<<endl;
+            // this->image=new PPMPixel*[this->ncols];
+            // for (size_t y = 0; y < this->nrows; y++){
+            // // //     PPMPixel * row = new PPMPixel[ncols];
+            // //     for (size_t x = 0; x < this->ncols; x++)
+            // // //     {
+            // // //         row[x].red=other.image[y][x].red;
+            // // //         row[x].green=other.image[y][x].green;
+            // // //         row[x].blue=other.image[y][x].blue;
+            // // //     }
+            // // //     this->image[y]=row;
+            //     // delete [] other.image[y];
+            //     other.image[y]=nullptr;
+            // }     
+            // other.image=nullptr;
+            // // delete [] other.image;
+            // cout<<"Cleared address "<<other.image<<endl;
+
+        }       
 
         return *this;
     }
 
     // Copy Constructor
     PPM::PPM(const PPM& other){
+        // cout<<"Copy Constructor"<<endl;
         this->fileName=std::string(other.fileName);
         this->ncols=int(other.ncols);
         this->nrows=int(other.nrows);
@@ -206,9 +263,7 @@ namespace LCKMAT002 {
                 row[x].blue=other.image[y][x].blue;
             }
             this->image[y]=row;
-        }        
-
-        // cout<<"Copy Constructor"<<endl;
+        }         
     }
 
     //============================================================================================================================= 

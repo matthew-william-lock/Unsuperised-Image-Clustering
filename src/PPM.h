@@ -28,6 +28,14 @@ namespace LCKMAT002{
         PPM(const std::string & filename);
         ~PPM();
 
+        unsigned char getBWPixel(int y, int x);
+        char getR(int y, int x);
+        char getG(int y, int x);
+        char getB(int y, int x);
+        int getNrows();
+        int getNcols();
+        std::string getFilename();
+
         // Special Members ===========================================================================================================
 
         // Move Constructor
