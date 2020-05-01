@@ -73,10 +73,10 @@ namespace LCKMAT002
             void add(const std::string & fileName, const std::vector<std::vector<int>> & hisogram);
 
             bool findAndDelete(std::string fileName);
-            // bool findAndDeleteIterator(std::string fileName);
+            bool findAndDeleteIterator(std::string fileName);
             // 
             // 
-            // void calcCentroid();
+            void calcCentroid();
             // std::unordered_map<std::string,std::vector<int>> getS();
             // void printSet();
 
@@ -109,7 +109,7 @@ namespace LCKMAT002
         void addPI(std::string fileName, std::vector<int> hisogram);  
 
         bool findAndDeleteRGB(std::string fileName, int x);    
-        // bool findAndDeletePIterator(std::string fileName, int x); 
+        bool findAndDeleteRGBIterator(std::string fileName, int x); 
         // void addPI(std::string fileName, std::vector<int> hisogram);
         
 

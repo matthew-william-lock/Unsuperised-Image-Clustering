@@ -14,23 +14,24 @@ int main(int argc, char* argv[]){
     std::string outputFile=std::string("");
     int clusters = 10;
     int hgramWidth = 1;
+    int tag = PIXEL_INTENSITY_TAG;
 
     if (argc<2){
         cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] "<<endl; 
         cout<<"usage: clusterer: error: too few arguments"<<endl;
         return 1;
     }
-    else if (argc>1 && argc < 9){
+    else if (argc>1 && argc < 11){
 
         for (size_t i = 2; i < argc; i++)
         {
-            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin"){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] "<<endl; 
+            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-feat"){
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-feat feature]"<<endl; 
                 cout<<"usage: clusterer: error: invalid option "<<string(argv[i])<<endl;
                 return 1;
             }
             else if (argc%2!=0){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] "<<endl; 
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-feat feature]"<<endl; 
                 cout<<"usage: clusterer: missing input parameter"<<endl;
                 return 1;
             }
@@ -49,6 +50,14 @@ int main(int argc, char* argv[]){
                 else{
                     cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] "<<endl; 
                     cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
+                    return 1;
+                }
+            }
+            else if (string(argv[i])=="-feat") {
+                if(string(argv[i+1])=="rgb") tag=RGB_TAG;
+                else{
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] "<<endl; 
+                    cout<<"usage: clusterer: invalid feature selection : "<<(argv[i+1])<<endl;
                     return 1;
                 }
             }
@@ -74,14 +83,14 @@ int main(int argc, char* argv[]){
         cout<<"======================================================================="<<endl;
 
         cout<<endl<<"===============Creating Image Feature==============="<<endl;
-        if (!cluster.generateHistograms(RGB_TAG)){
+        if (!cluster.generateHistograms(tag)){
             cout<<"Error generating image feature"<<endl;
             return 1;
         }      
         cout<<"========================================================="<<endl;
 
         cout<<endl<<"===============Initialising Clusters==============="<<endl;
-        if (!cluster.generateHistograms(RGB_TAG,clusters)){
+        if (!cluster.generateHistograms(tag,clusters)){
             cout<<"Error generating clusters"<<endl;
             return 1;
         }      
@@ -93,21 +102,20 @@ int main(int argc, char* argv[]){
 
         cout<<"-----Iteration "<<++it<<"-----"<<endl; 
         // The first iteration should incur any moves 
-        if (!cluster.iterateClusters(RGB_TAG)){
+        if (!cluster.iterateClusters(tag)){
             cout<<"Error generating clusters"<<endl;
             return 1;
         }
+        cout<<"----------"<<endl<<endl;        
+        it++;
+        // Iterartions there after might move from one set to another  
+        cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        while (cluster.iterateClusters(tag)){
+            it++;
+            cout<<"----------"<<endl<<endl;
+            cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        }  
         cout<<"----------"<<endl<<endl;
-        
-        // it++;
-        // // Iterartions there after might move from one set to another  
-        // cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        // while (cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
-        //     it++;
-        //     cout<<"----------"<<endl<<endl;
-        //     cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        // }  
-        // cout<<"----------"<<endl<<endl;
 
         cout<<"Number of iterations:"<<it<<endl;
 
