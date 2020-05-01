@@ -11,7 +11,7 @@ bool is_number(const std::string& s)
 int main(int argc, char* argv[]){
     using namespace std;
 
-    std::string outputFile=std::string();
+    std::string outputFile=std::string("");
     int clusters = 10;
     int hgramWidth = 1;
 
@@ -74,14 +74,14 @@ int main(int argc, char* argv[]){
         cout<<"======================================================================="<<endl;
 
         cout<<endl<<"===============Creating Image Feature==============="<<endl;
-        if (!cluster.generateHistograms(PIXEL_INTENSITY_TAG)){
+        if (!cluster.generateHistograms(RGB_TAG)){
             cout<<"Error generating image feature"<<endl;
             return 1;
         }      
         cout<<"========================================================="<<endl;
 
         cout<<endl<<"===============Initialising Clusters==============="<<endl;
-        if (!cluster.generateHistograms(PIXEL_INTENSITY_TAG,clusters)){
+        if (!cluster.generateHistograms(RGB_TAG,clusters)){
             cout<<"Error generating clusters"<<endl;
             return 1;
         }      
@@ -91,23 +91,23 @@ int main(int argc, char* argv[]){
         cout<<endl;  
         int it = 0;
 
-        cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        cout<<"-----Iteration "<<++it<<"-----"<<endl; 
         // The first iteration should incur any moves 
-        if (!cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
+        if (!cluster.iterateClusters(RGB_TAG)){
             cout<<"Error generating clusters"<<endl;
             return 1;
         }
         cout<<"----------"<<endl<<endl;
         
-        it++;
-        // Iterartions there after might move from one set to another  
-        cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        while (cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
-            it++;
-            cout<<"----------"<<endl<<endl;
-            cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        }  
-        cout<<"----------"<<endl<<endl;
+        // it++;
+        // // Iterartions there after might move from one set to another  
+        // cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        // while (cluster.iterateClusters(PIXEL_INTENSITY_TAG)){
+        //     it++;
+        //     cout<<"----------"<<endl<<endl;
+        //     cout<<"-----Iteration "<<it<<"-----"<<endl; 
+        // }  
+        // cout<<"----------"<<endl<<endl;
 
         cout<<"Number of iterations:"<<it<<endl;
 

@@ -4,12 +4,15 @@
 #include "PPM.h"
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <unordered_map>
 #include <memory> // C++11
 #include <string>
+#include <cstdio>
 
 #define PIXEL_INTENSITY_TAG 0
+#define RGB_TAG 1
 
 namespace LCKMAT002
 {
@@ -50,20 +53,64 @@ namespace LCKMAT002
 
         //===========================================================================================
 
+         // Nested class to hold RGB cluster sets ========================================================
+
+        class RGBClusterSet
+        {
+        private:
+            std::unordered_map<std::string,std::vector<std::vector<int>>> s;
+            std::vector<std::vector<int>> centroid;
+            std::string centroidName;
+        public:
+            RGBClusterSet(/* args */);
+            ~RGBClusterSet();
+
+            void setCentroid(const std::string & name, const std::vector<std::vector<int>> & centroid);
+            std::vector<std::vector<int>> getCentroid();
+            std::string getCentroidName();
+
+            int getSize();
+            void add(const std::string & fileName, const std::vector<std::vector<int>> & hisogram);
+
+            bool findAndDelete(std::string fileName);
+            // bool findAndDeleteIterator(std::string fileName);
+            // 
+            // 
+            // void calcCentroid();
+            // std::unordered_map<std::string,std::vector<int>> getS();
+            // void printSet();
+
+            void printSetAndDistances(const std::vector<Cluster::RGBClusterSet> & setOfClusters, const int & clusterNo );
+            double distanceRGB(const std::vector<std::vector<int>> & point, const Cluster::RGBClusterSet & set);
+            
+        };      
+
+        //===========================================================================================
+
         // Perform unix terminal commands and pipe back to program
         std::string exec(std::string command);
     
-        std::vector<Cluster::PixelIntensityClusterSet> PIclusters; // cluster data
-        std::vector<double> distancesPI; // keep information of distances
+        std::vector<Cluster::PixelIntensityClusterSet> PIclusters; // PI cluster data
+        std::vector<Cluster::RGBClusterSet> RGBclusters; // PI cluster data
 
-        std::unordered_map<std::string,std::vector<int>> clusterData;
-        std::vector<LCKMAT002::PPM> images; // image data
+
+        std::vector<double> distancesPI; // keep information of distances for PI
+        std::vector<double> distancesRGB; // keep information of distances for RGB  
+
+        std::unordered_map<std::string,std::vector<int>> clusterData; // PI Cluster data
+        std::unordered_map<std::string,std::vector<std::vector<int>>> RGBclusterData; // RGB Cluster data
+
+        std::vector<LCKMAT002::PPM> images; // PPM image data
         int binSize; 
 
         // Find and delete file from all clusters, except for cluster x
         bool findAndDeletePI(std::string fileName, int x);    
         bool findAndDeletePIterator(std::string fileName, int x); 
         void addPI(std::string fileName, std::vector<int> hisogram);  
+
+        bool findAndDeleteRGB(std::string fileName, int x);    
+        // bool findAndDeletePIterator(std::string fileName, int x); 
+        // void addPI(std::string fileName, std::vector<int> hisogram);
         
 
     public:

@@ -29,9 +29,9 @@ namespace LCKMAT002{
         ~PPM();
 
         unsigned char getBWPixel(int y, int x);
-        char getR(int y, int x);
-        char getG(int y, int x);
-        char getB(int y, int x);
+        unsigned char getR(int y, int x);
+        unsigned char getG(int y, int x);
+        unsigned char getB(int y, int x);
         int getNrows();
         int getNcols();
         std::string getFilename();

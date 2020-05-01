@@ -101,15 +101,15 @@ namespace LCKMAT002 {
         return ncols;
     };
 
-    char PPM::getR(int y, int x){
+    unsigned char PPM::getR(int y, int x){
         return image[y][x].red;
     }
 
-    char PPM::getG(int y, int x){
+    unsigned char PPM::getG(int y, int x){
         return image[y][x].green;
     }
 
-    char PPM::getB(int y, int x){
+    unsigned char PPM::getB(int y, int x){
         return image[y][x].blue;
     }
 
