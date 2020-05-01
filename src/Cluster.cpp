@@ -73,7 +73,7 @@ namespace LCKMAT002{
         // Initialise distances
         for (size_t i = 0; i < images.size(); i++){
             distancesPI.push_back(16581375); // Largest possible distance to act as infinity
-            distancesRGB.push_back(16581375); // Largest possible distance to act as infinity
+            distancesRGB.push_back(99999999999999); // Largest possible distance to act as infinity
         }
         
 
@@ -113,18 +113,20 @@ namespace LCKMAT002{
             
         }            
 
-        binCount = -1;
-        int entryNo=-1;
-        while (binCount<RGB_COMPONENT_COLOR)
-        {
-            int lower=++binCount;
-            binCount=binCount+binSize-1;
-            int upper = binCount;
-            if (binCount>=RGB_COMPONENT_COLOR) {
-                binCount=RGB_COMPONENT_COLOR;
-                upper=binCount;
-            }
-            entryNo++; 
+        // binCount = -1;
+        // int entryNo=-1;
+        // while (binCount<RGB_COMPONENT_COLOR)
+        // {
+        //     int lower=++binCount;
+        //     binCount=binCount+binSize-1;
+        //     int upper = binCount;
+        //     if (binCount>=RGB_COMPONENT_COLOR) {
+        //         binCount=RGB_COMPONENT_COLOR;
+        //         upper=binCount;
+        //     }
+        //     entryNo++; 
+
+        //     cout<<"Generating "<<(entryNo+1)<<"/"<<numberOfEnteries<<endl;            
 
             // Generate histograms
             for (size_t i = 0; i < images.size(); i++){
@@ -137,22 +139,42 @@ namespace LCKMAT002{
                 } else if(P_it->second.size()!=numberOfEnteries || RGB_it->second.size()!=numberOfEnteries){
                     cout<<"Error generating histograms"<<endl<<"The image length of the vector in cluster data does not correspond to the bin size"<<endl;
                     return false;
-                }                    
+                } 
                 vector<int> P_temp = P_it->second;
                 vector<vector<int>> RGB_temp = RGB_it->second;
-                for (size_t y = 0; y < image.getNrows(); y++){
-                    for (size_t x = 0; x < image.getNcols(); x++){                   
-                        if (image.getBWPixel(y,x) >= lower && image.getBWPixel(y,x) <= upper)   P_temp.at(entryNo)++; 
-                        if (image.getR(y,x) >= lower && image.getR(y,x) <= upper) RGB_temp.at(entryNo).at(0) ++; 
-                        if (image.getG(y,x) >= lower && image.getG(y,x) <= upper) RGB_temp.at(entryNo).at(1) ++; 
-                        if (image.getB(y,x) >= lower && image.getB(y,x) <= upper) RGB_temp.at(entryNo).at(2) ++; 
-                        RGBclusterData[image.getFilename()]=RGB_temp; 
-                        clusterData[image.getFilename()]=P_temp;
+
+                binCount = -1;
+                int entryNo=-1;
+                while (binCount<RGB_COMPONENT_COLOR)
+                {
+                    int lower=++binCount;
+                    binCount=binCount+binSize-1;
+                    int upper = binCount;
+                    if (binCount>=RGB_COMPONENT_COLOR) {
+                        binCount=RGB_COMPONENT_COLOR;
+                        upper=binCount;
                     }
+                    entryNo++; 
+
+                    for (size_t y = 0; y < image.getNrows(); y++){
+                        for (size_t x = 0; x < image.getNcols(); x++){                   
+                            if (image.getBWPixel(y,x) >= lower && image.getBWPixel(y,x) <= upper)   P_temp.at(entryNo)++; 
+                            if (image.getR(y,x) >= lower && image.getR(y,x) <= upper) RGB_temp.at(entryNo).at(0) ++; 
+                            if (image.getG(y,x) >= lower && image.getG(y,x) <= upper) RGB_temp.at(entryNo).at(1) ++; 
+                            if (image.getB(y,x) >= lower && image.getB(y,x) <= upper) RGB_temp.at(entryNo).at(2) ++; 
+                            RGBclusterData[image.getFilename()]=RGB_temp; 
+                            clusterData[image.getFilename()]=P_temp;
+                        }
+                    }
+
+                    
                 }
+
+
+                
                 
             }
-        }
+        // }
 
         // Print results
         cout<<endl;
@@ -402,6 +424,7 @@ namespace LCKMAT002{
         else if (TAG==RGB_TAG){
 
             // Populate clusters on initial run
+
             if (RGBclusters.begin()->getSize()==0){
                 // Work with each image
                 for (size_t i = 0; i < RGBclusterData.size(); i++){
@@ -413,13 +436,8 @@ namespace LCKMAT002{
                     for (size_t c = 0; c < RGBclusters.size(); c++){
                         double tempDistance=0;
 
-                        // Determine the distance to centroid
-                        for (size_t binLocation = 0; binLocation < RGBclusters.at(c).getCentroid().size(); binLocation++){
-                            double R_val = RGBclusters.at(c).getCentroid().at(binLocation).at(0) - image.at(binLocation).at(0);
-                            double G_val = RGBclusters.at(c).getCentroid().at(binLocation).at(0) - image.at(binLocation).at(1);
-                            double B_val = RGBclusters.at(c).getCentroid().at(binLocation).at(0) - image.at(binLocation).at(2);
-                            tempDistance += R_val*R_val + G_val*G_val*G_val +B_val*B_val;                       
-                        }                   
+                        // Determine the distance to centroid  
+                        tempDistance=RGBclusters.at(c).distanceRGB(image,RGBclusters.at(c));               
 
                         if (images.at(i).getFilename()==RGBclusters.at(c).getCentroidName())
                         {
@@ -428,9 +446,10 @@ namespace LCKMAT002{
                             auto it = RGBclusterData.find(images.at(i).getFilename());
                             RGBclusters.at(c).add(images.at(i).getFilename(),image);
                             moved = findAndDeleteRGB(images.at(i).getFilename(),c);
+                            
                         }                    
                         
-                        else if (tempDistance<distance && images.at(i).getFilename()!=PIclusters.at(c).getCentroidName()) {
+                        else if (tempDistance<distance && images.at(i).getFilename()!=RGBclusters.at(c).getCentroidName()) {
                             distance = tempDistance;
                             distancesRGB.at(i)=distance;
                             auto it = RGBclusterData.find(images.at(i).getFilename());
@@ -443,11 +462,21 @@ namespace LCKMAT002{
                 }
 
                 // Move the centroids
-                for (size_t i = 0; i < PIclusters.size(); i++){
+                for (size_t i = 0; i < RGBclusters.size(); i++){
                     RGBclusters.at(i).printSetAndDistances(RGBclusters,i);
                     // PIclusters.at(i).calcCentroid(); 
                     cout<<endl; 
                 }
+
+                int count = 0;
+                for (size_t i = 0; i < RGBclusters.size(); i++)
+                {
+                    count += RGBclusters.at(i).getSize();
+                }
+                cout<<"Number of items in sets "<<count<<endl;
+            
+            
+            return moved;
 
                 return true;
 
