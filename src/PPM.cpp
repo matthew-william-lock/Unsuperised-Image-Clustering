@@ -118,7 +118,7 @@ namespace LCKMAT002 {
         return 0.21 * image[y][x].red + 0.72 * image[y][x].green + 0.07 * image[y][x].blue;
     }
 
-    std::string PPM::getFilename(){
+    std::string const PPM::getFilename(){
         return fileName;
     }
 

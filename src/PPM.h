@@ -34,7 +34,7 @@ namespace LCKMAT002{
         unsigned char getB(int y, int x);
         int getNrows();
         int getNcols();
-        std::string getFilename();
+        std::string const getFilename();
 
         // Special Members ===========================================================================================================
 

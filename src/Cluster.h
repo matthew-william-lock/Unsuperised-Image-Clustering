@@ -44,7 +44,7 @@ namespace LCKMAT002
             int getSize();
             void calcCentroid();
             std::unordered_map<std::string,std::vector<int>> getS();
-            void printSet();
+            std::string printSet();
             void printSetAndDistances(const std::vector<Cluster::PixelIntensityClusterSet> & setOfClusters, const int & clusterNo );
 
             double distancePI(const std::vector<int> & point, const Cluster::PixelIntensityClusterSet & set);
@@ -67,7 +67,7 @@ namespace LCKMAT002
 
             void setCentroid(const std::string & name, const std::vector<std::vector<int>> & centroid);
             std::vector<std::vector<int>> getCentroid();
-            std::string getCentroidName();
+            std::string const getCentroidName();
 
             int getSize();
             void add(const std::string & fileName, const std::vector<std::vector<int>> & hisogram);
@@ -78,7 +78,7 @@ namespace LCKMAT002
             // 
             void calcCentroid();
             // std::unordered_map<std::string,std::vector<int>> getS();
-            // void printSet();
+            std::string printSet();
 
             void printSetAndDistances(const std::vector<Cluster::RGBClusterSet> & setOfClusters, const int & clusterNo );
             double distanceRGB(const std::vector<std::vector<int>> & point, const Cluster::RGBClusterSet & set);
@@ -132,7 +132,16 @@ namespace LCKMAT002
         // Generate Cluster
         bool iterateClusters(int TAG);         
 
+        // Operator Overloading
+        friend std::ostream& operator<<(std::ostream& os, const Cluster& dt);
+
+        // Check PIClusters
+        bool const isEmptyPI();
+
     };
+    
+    // Operator Overloading
+    std::ostream& operator<<(std::ostream& os, const Cluster& dt);
         
 
 }

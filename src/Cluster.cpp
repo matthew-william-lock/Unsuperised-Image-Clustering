@@ -454,36 +454,35 @@ namespace LCKMAT002{
             if (RGBclusters.begin()->getSize()==0){
                 // Work with each image
                 for (size_t i = 0; i < RGBclusterData.size(); i++){
-                    // Largest distance possible initially set
-                    double distance=distancesRGB.at(i);
+
+
+                    // Distance to current centroid
                     vector<vector<int>> image = RGBclusterData.find(images.at(i).getFilename())->second;
+
+                    int newClusterSet=0;
+                    double distance=RGBclusters.at(0).distanceRGB(image,RGBclusters.at(0));
 
                     // Work with each cluster
                     for (size_t c = 0; c < RGBclusters.size(); c++){
-                        double tempDistance=0;
 
                         // Determine the distance to centroid  
-                        tempDistance=RGBclusters.at(c).distanceRGB(image,RGBclusters.at(c));               
-
-                        if (images.at(i).getFilename()==RGBclusters.at(c).getCentroidName())
-                        {
-                            distance = tempDistance;
-                            distancesRGB.at(i)=distance;
-                            auto it = RGBclusterData.find(images.at(i).getFilename());
-                            RGBclusters.at(c).add(images.at(i).getFilename(),image);
-                            moved = findAndDeleteRGB(images.at(i).getFilename(),c);
-                            
-                        }                    
-                        
-                        else if (tempDistance<distance && images.at(i).getFilename()!=RGBclusters.at(c).getCentroidName()) {
-                            distance = tempDistance;
-                            distancesRGB.at(i)=distance;
-                            auto it = RGBclusterData.find(images.at(i).getFilename());
-                            RGBclusters.at(c).add(images.at(i).getFilename(),image);
-                            moved = findAndDeleteRGB(images.at(i).getFilename(),c);
-                        }    
+                        double tempDistance=RGBclusters.at(c).distanceRGB(image,RGBclusters.at(c));
+                        if (tempDistance<distance){
+                            distance=tempDistance;
+                            newClusterSet=c;
+                        }                      
                         
                     }
+
+                    distancesRGB.at(i)=distance;
+                    if(findAndDeleteRGBIterator(images.at(i).getFilename(),newClusterSet)) {
+                        moved=true;
+                        RGBclusters.at(newClusterSet).add(images.at(i).getFilename(),image);
+                    } else {
+                        moved=true;
+                        RGBclusters.at(newClusterSet).add(images.at(i).getFilename(),image);
+                    }
+
                     // cout<<endl;         
                 }
 
@@ -506,7 +505,6 @@ namespace LCKMAT002{
 
 
                     // Distance to current centroid
-                    // double distance=distancesRGB.at(i);
                     vector<vector<int>> image = RGBclusterData.find(images.at(i).getFilename())->second;
 
                     int newClusterSet=0;
@@ -521,21 +519,6 @@ namespace LCKMAT002{
                             distance=tempDistance;
                             newClusterSet=c;
                         }                      
-                        // cout<< tempDistance<<"\t"<<PIclusters.at(c).getCentroidName()<<endl;                                            
-                        // if (tempDistance<distance) {
-                        //     auto it = RGBclusterData.find(images.at(i).getFilename());    
-
-                        //     cout<<"Moving "<<images.at(i).getFilename()<<" "<<tempDistance<<" "<<distance<<endl;          
-
-                        //     // Deletes cluster if it is emptied              
-                        //     if(findAndDeleteRGBIterator(images.at(i).getFilename(),c)) {
-                        //         moved=true;
-                        //         RGBclusters.at(c).add(images.at(i).getFilename(),image);
-                        //         distance = tempDistance;
-                        //         distancesRGB.at(i)=distance;
-                        //     }
-                        //     // cout<<moved<<endl;
-                        // }    
                         
                     }
                     distancesRGB.at(i)=distance;
@@ -554,11 +537,7 @@ namespace LCKMAT002{
                     cout<<endl; 
                 }
 
-                // for (size_t i = 0; i < RGBclusterData.size(); i++)
-                // {
-                //     cout<<RGBclusterData.find(images.at(i).getFilename())->first<<" "<<distancesRGB.at(i)<<endl;
-                // }
-                // cout<<endl;
+                
                 
 
                 //Display number of clusters left
@@ -643,6 +622,12 @@ namespace LCKMAT002{
         return result;
         
     }
+
+    bool const Cluster::isEmptyPI(){
+        if (RGBclusters.at(0).getSize()) return true;
+        return false;
+        
+    };
 
     // Nested class to hold cluster sets =====================================================================================================================
 
@@ -747,15 +732,18 @@ namespace LCKMAT002{
         return this->s;
     }
 
-    void Cluster::PixelIntensityClusterSet::printSet(){
+    std::string Cluster::PixelIntensityClusterSet::printSet(){
         using namespace std;
 
-        cout<<"Set space"<<endl;
+        stringstream ss;
+        ss<<"Initial centroid : " <<centroidName <<endl;
         for (auto it = s.begin(); it!=s.end(); it++){
-            cout<<it->first<<"\t:\t"<<distancePI(it->second,*this);
-            cout<<endl;    
+            ss<<it->first;
+            ss<<endl;    
         }
-        cout<<endl;
+        ss<<endl;
+
+        return ss.str();
 
         
     }
@@ -817,7 +805,7 @@ namespace LCKMAT002{
         return centroid;
     }
 
-    std::string Cluster::RGBClusterSet::getCentroidName(){
+    std::string const Cluster::RGBClusterSet::getCentroidName(){
         return this->centroidName;
     }
 
@@ -895,18 +883,20 @@ namespace LCKMAT002{
     //     return this->s;
     // }
 
-    // void Cluster::PixelIntensityClusterSet::printSet(){
-    //     using namespace std;
+    std::string Cluster::RGBClusterSet::printSet(){
+        using namespace std;
 
-    //     cout<<"Set space"<<endl;
-    //     for (auto it = s.begin(); it!=s.end(); it++){
-    //         cout<<it->first<<"\t:\t"<<distancePI(it->second,*this);
-    //         cout<<endl;    
-    //     }
-    //     cout<<endl;
+        stringstream ss;
+        ss<<"Initial centroid : " <<centroidName <<endl;
+        for (auto it = s.begin(); it!=s.end(); it++){
+            ss<<it->first;
+            ss<<endl;    
+        }
+        ss<<endl;
 
-        
-    // }
+        return ss.str();
+
+    }
 
     void Cluster::RGBClusterSet::printSetAndDistances(const std::vector<Cluster::RGBClusterSet> & setOfClusters,const int & clusterNo){
         using namespace std;    
@@ -947,5 +937,27 @@ namespace LCKMAT002{
 
     //==========================================================================================================================================================
 
+
+    // Operator overloads
+    std::ostream& operator<<(std::ostream& os, const Cluster& dt){
+
+        std::vector<Cluster::RGBClusterSet>  rgb = dt.RGBclusters;
+        std::vector<Cluster::PixelIntensityClusterSet>  pi = dt.PIclusters;
+
+        if (rgb.at(0).getSize()>0){
+            for (size_t i = 0; i < rgb.size(); i++){
+                os<<"Set "<<i<<std::endl;
+                os<<rgb.at(i).printSet();   
+            }
+            
+        } else {
+            for (size_t i = 0; i < pi.size(); i++){
+                os<<"Set "<<i<<std::endl;
+                os<<pi.at(i).printSet();   
+            }
+        }
+
+        return os;
+    }   
 
 }
