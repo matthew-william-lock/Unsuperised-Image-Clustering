@@ -46,7 +46,14 @@ int main(int argc, char* argv[]){
                 }                
             }
             else if (string(argv[i])=="-bin") {
-                if(is_number(string(argv[i+1]))) hgramWidth= stoi(string(argv[i+1]));
+                if(is_number(string(argv[i+1]))) {
+                    if (stoi(string(argv[i+1]))>0 && stoi(string(argv[i+1]))< RGB_COMPONENT_COLOR+1) hgramWidth= stoi(string(argv[i+1]));
+                    else{
+                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+                        cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
+                        return 1;
+                    }
+                }
                 else{
                     cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
                     cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;

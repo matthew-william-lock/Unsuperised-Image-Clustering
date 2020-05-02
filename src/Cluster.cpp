@@ -946,13 +946,13 @@ namespace LCKMAT002{
 
         if (rgb.at(0).getSize()>0){
             for (size_t i = 0; i < rgb.size(); i++){
-                os<<"Set "<<i<<std::endl;
+                os<<"Set "<<i+1<<std::endl;
                 os<<rgb.at(i).printSet();   
             }
             
         } else {
             for (size_t i = 0; i < pi.size(); i++){
-                os<<"Set "<<i<<std::endl;
+                os<<"Set "<<i+1<<std::endl;
                 os<<pi.at(i).printSet();   
             }
         }
