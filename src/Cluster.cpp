@@ -506,33 +506,44 @@ namespace LCKMAT002{
 
 
                     // Distance to current centroid
-                    double distance=distancesRGB.at(i);
+                    // double distance=distancesRGB.at(i);
                     vector<vector<int>> image = RGBclusterData.find(images.at(i).getFilename())->second;
+
+                    int newClusterSet=0;
+                    double distance=RGBclusters.at(0).distanceRGB(image,RGBclusters.at(0));
 
                     // Work with each cluster
                     for (size_t c = 0; c < RGBclusters.size(); c++){
 
                         // Determine the distance to centroid  
                         double tempDistance=RGBclusters.at(c).distanceRGB(image,RGBclusters.at(c));
+                        if (tempDistance<distance){
+                            distance=tempDistance;
+                            newClusterSet=c;
+                        }                      
+                        // cout<< tempDistance<<"\t"<<PIclusters.at(c).getCentroidName()<<endl;                                            
+                        // if (tempDistance<distance) {
+                        //     auto it = RGBclusterData.find(images.at(i).getFilename());    
 
-                        // cout<< tempDistance<<"\t"<<PIclusters.at(c).getCentroidName()<<endl;                                        
-                        
-                        if (tempDistance<distance) {
-                            auto it = RGBclusterData.find(images.at(i).getFilename());    
+                        //     cout<<"Moving "<<images.at(i).getFilename()<<" "<<tempDistance<<" "<<distance<<endl;          
 
-                            // cout<<"Moving "<<images.at(i).getFilename()<<" "<<tempDistance<<" "<<distance<<endl;          
-
-                            // Deletes cluster if it is emptied              
-                            if(findAndDeleteRGBIterator(images.at(i).getFilename(),c)) {
-                                moved=true;
-                                RGBclusters.at(c).add(images.at(i).getFilename(),image);
-                                distance = tempDistance;
-                                distancesRGB.at(i)=distance;
-                            }
-                            // cout<<moved<<endl;
-                        }    
+                        //     // Deletes cluster if it is emptied              
+                        //     if(findAndDeleteRGBIterator(images.at(i).getFilename(),c)) {
+                        //         moved=true;
+                        //         RGBclusters.at(c).add(images.at(i).getFilename(),image);
+                        //         distance = tempDistance;
+                        //         distancesRGB.at(i)=distance;
+                        //     }
+                        //     // cout<<moved<<endl;
+                        // }    
                         
                     }
+                    distancesRGB.at(i)=distance;
+                    if(findAndDeleteRGBIterator(images.at(i).getFilename(),newClusterSet)) {
+                        moved=true;
+                        RGBclusters.at(newClusterSet).add(images.at(i).getFilename(),image);
+                    }
+
                     // cout<<endl;         
                 }
 
@@ -542,6 +553,13 @@ namespace LCKMAT002{
                     RGBclusters.at(i).calcCentroid(); 
                     cout<<endl; 
                 }
+
+                // for (size_t i = 0; i < RGBclusterData.size(); i++)
+                // {
+                //     cout<<RGBclusterData.find(images.at(i).getFilename())->first<<" "<<distancesRGB.at(i)<<endl;
+                // }
+                // cout<<endl;
+                
 
                 //Display number of clusters left
                 cout<<"Number of cluster left at the end of iteration : "<<PIclusters.size()<<endl;
@@ -609,17 +627,17 @@ namespace LCKMAT002{
 
     bool Cluster::findAndDeleteRGBIterator(std::string fileName, int x){
         bool result = false;
-        for (size_t i = 0; i < RGBclusters.size(); i++){           
+        for (size_t i = 0; i < RGBclusters.size(); i++){         
+            if (i!=x){
+                result = RGBclusters.at(i).findAndDeleteIterator(fileName);
+                if (result) {
 
-            result = RGBclusters.at(i).findAndDeleteIterator(fileName);
-            if (result) {
-
-                if (RGBclusters.at(i).getSize()==0) {
-                    RGBclusters.erase(RGBclusters.begin()+i); 
-                }                  
-                return result;
-            }
-               
+                    if (RGBclusters.at(i).getSize()==0) {
+                        RGBclusters.erase(RGBclusters.begin()+i); 
+                    }                  
+                    return result;
+                }
+            }              
                     
         }
         return result;
