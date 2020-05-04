@@ -3,6 +3,7 @@
 
 #define RANDOM_CENTROIDS 0
 #define IMAGES_TO_RANDOM_CLUSTERS 1
+#define K_MEANS_PLUS 2
 
 /**
  * Determine if string is a number
@@ -29,7 +30,7 @@ int main(int argc, char* argv[]){
     int tag = PIXEL_INTENSITY_TAG;
     int iterations = 1;
     
-    int init = RANDOM_CENTROIDS;
+    int init = K_MEANS_PLUS;
 
     /* Check to see if user has run the program with the correct arguments
     * 
@@ -48,11 +49,15 @@ int main(int argc, char* argv[]){
     *                  The bin size is set to 1 by default
     * 
     * [-color c]    - 'c' tells the k-means algorithm whether to consider RGB pixels, or only greyscale pixel. 
-    *                 'rgb' for colour and 'g' for greyscale. 
+    *                 'rgb' for colour and g' for greyscale. 
     *                  Greyscale is selected by default      
     * 
     * [-it n]       - 'n' represents the number of time k-means will be run so that the spread can be minimised 
     *                  K-means will run once by default
+    * 
+    * [-init i]     - 'i' represents the method of initalization for k-means
+    *                 'cent' for random centroid initalization, 'clust' for assigning images to random clusters, 'plus' for k-means+ method
+    *                 K-means+ is default method (used weighted probabilsted funtion to select centroids, is more ideal than standard K-means)  
     *   
     */
 
@@ -119,6 +124,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-init") {
                 if(string(argv[i+1])=="cent") init=RANDOM_CENTROIDS;
                 else if (string(argv[i+1])=="clust") init = IMAGES_TO_RANDOM_CLUSTERS;
+                else if (string(argv[i+1])=="plus") init = K_MEANS_PLUS;
                 else{
                     cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                     cout<<"usage: clusterer: invalid initialization of k-means : "<<string(argv[i+1])<<endl;
@@ -204,6 +210,13 @@ int main(int argc, char* argv[]){
 
             else if (init==IMAGES_TO_RANDOM_CLUSTERS){
                 if (!cluster.pointsToRandomClusters(tag,clusters,rand())){
+                    cout<<"Error generating clusters"<<endl;
+                    return 1;
+                } 
+            }
+
+            else if (init == K_MEANS_PLUS){
+                if (!cluster.kMeansPlus(tag,clusters,rand())){
                     cout<<"Error generating clusters"<<endl;
                     return 1;
                 } 

@@ -136,6 +136,7 @@ namespace LCKMAT002
         // Initialise k-means
         bool randomCentroids(int TAG, int noClusters,unsigned int seed);
         bool pointsToRandomClusters(int TAG, int noClusters,unsigned int seed);
+        bool kMeansPlus(int TAG, int noClusters,unsigned int seed);
 
         // Iterare Cluster
         bool iterateClusters(int TAG);

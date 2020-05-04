@@ -231,7 +231,7 @@ namespace LCKMAT002{
         return true;  
     }
 
-    bool Cluster::  pointsToRandomClusters(int TAG, int noClusters, unsigned int seed){
+    bool Cluster::pointsToRandomClusters(int TAG, int noClusters, unsigned int seed){
         using namespace std;
 
         int imagesAssigned =0;
@@ -293,6 +293,147 @@ namespace LCKMAT002{
         for (size_t i = 0; i < noClusters; i++){            
             if (TAG==PIXEL_INTENSITY_TAG) cout<<PIclusters.at(i).printSet();
             else if (TAG==RGB_TAG) RGBclusters.at(i).printSetAndDistances(RGBclusters,i);
+        }
+        return true;
+    }
+
+    bool Cluster::kMeansPlus(int TAG, int noClusters, unsigned int seed){
+        using namespace std;
+
+        int imagesAssigned =0;
+        int numberOfImages=0;
+
+        if (TAG==PIXEL_INTENSITY_TAG) numberOfImages = clusterData.size();
+        else if (TAG==RGB_TAG) numberOfImages = RGBclusterData.size();
+
+        /*
+
+        Steps for K-means++ (https://en.wikipedia.org/wiki/K-means%2B%2B)
+
+        1.1) Choose one center uniformly at random among the data points.
+        1.2) For each data point x, compute D(x), the distance between x and the nearest center that has already been chosen.
+        1.3) Choose one new data point at random as a new center, using a weighted probability distribution where a point x is chosen with probability proportional to D(x)2.
+        1.4) Repeat Steps 2 and 3 until k centers have been chosen.
+        1.5) Now that the initial centers have been chosen, proceed using standard k-means clustering.
+
+        Steps for implementing weighted probability distribution (https://stats.stackexchange.com/questions/272114/using-kmeans-computing-weighted-probability-for-kmeans-initialization)
+
+        2.1) Assume that you have an array D2 that contains the squared of the distances computed in step 2
+        2.2) Normalize D2, that is, divide each element by the sum of D2. 
+        2.3) Then, generate a uniform random number r in [0,1]. 
+        2.4) Choose the first element in the list that the sum of the values in the normalized D2 up to that element is greater than or equal to r. 
+        For example, if the normalized D2 is [0.2,0.1,0.4,0.3] and r is 0.55, the third element is selected.
+
+        */
+
+        // Instantiate clusters
+        for (size_t i = 0; i < noClusters; i++){
+            if (TAG==PIXEL_INTENSITY_TAG) {
+                PixelIntensityClusterSet cluster = PixelIntensityClusterSet();
+                PIclusters.push_back(cluster);
+            }
+            else if (TAG==RGB_TAG) {
+                RGBClusterSet RGBcluster = RGBClusterSet();
+                RGBclusters.push_back(RGBcluster);
+            }
+        } 
+
+        // 2.1 Choose one center uniformly at random
+        srand(seed); // Seed random number generator
+        int randNum = rand()%((numberOfImages-1)-0 + 1) + 0;
+        if (TAG==PIXEL_INTENSITY_TAG) {
+            auto image = clusterData.find(images.at(randNum).getFilename());
+            PIclusters.at(0).setCentroid(image->first,image->second);
+        } else if (TAG==RGB_TAG){
+            auto image = RGBclusterData.find(images.at(randNum).getFilename());
+            RGBclusters.at(0).setCentroid(image->first,image->second);
+        }
+
+        // 1.2 - 1.3
+        for (size_t k = 1; k < noClusters; k++){
+
+            cout<<"k "<< k<<endl;
+
+            // 1.2 ComputeD2
+            vector<double> D2 = vector<double>();
+            double sum =0;
+
+            cout<<"Distances ";
+            for (size_t i = 0; i < images.size(); i++){
+                //Find closest cluster
+                double distance;
+                if (TAG == PIXEL_INTENSITY_TAG){
+                    auto image = clusterData.find(images.at(i).getFilename());
+                    distance=PIclusters.at(0).distancePI(image->second,PIclusters.at(0));
+                    int clusterSet=0;          
+                    // Find nearest cluster
+                    for (size_t c = 0; c < k; c++){
+                        double tempDistance=PIclusters.at(c).distancePI(image->second,PIclusters.at(c));
+                        if (tempDistance<distance){
+                            distance=tempDistance;
+                            clusterSet=c;
+                        }                                     
+                    } 
+                                
+                }  else if (TAG == RGB_TAG){
+                    auto image = RGBclusterData.find(images.at(i).getFilename());
+                    distance=RGBclusters.at(0).distanceRGB(image->second,RGBclusters.at(0));
+                    int clusterSet=0;          
+                    // Find nearest cluster
+                    for (size_t c = 0; c < k; c++){
+                        double tempDistance=RGBclusters.at(c).distanceRGB(image->second,RGBclusters.at(c));
+                        if (tempDistance<distance){
+                            distance=tempDistance;
+                            clusterSet=c;
+                        }                                     
+                    }           
+                }     
+                cout<<distance<<" ";
+                D2.push_back(distance); 
+                sum+=distance;                          
+            }
+            cout<<endl;
+            cout<<"Size of D2 :"<<D2.size()<<endl;
+            cout<<"Sum of distances "<<sum<<endl;
+
+            // 2.2 Normalise D2
+            cout<<"Normalised Distances ";
+            for (size_t D2_it = 0; D2_it < D2.size(); D2_it++){
+                D2.at(D2_it)=(D2.at(D2_it))/sum;
+                cout<<D2.at(D2_it)<<" ";
+            }
+            cout<<endl;
+
+            // 2.3 Uniform Random Number
+            double randNum = (double)rand()/((double)RAND_MAX+1);
+            cout<<"Random number "<<randNum<<endl;
+
+            // 2.4 Choose new element
+            double counter = D2.at(0);
+            int position=0;
+            while (counter<randNum){
+                counter+=D2.at(position);
+                position++;
+            }
+            if (position>(numberOfImages-1))position=numberOfImages-1; // Account for rang of vector
+            cout<<"New centroid is image at "<<position<<endl<<endl;
+
+            // 1.3 set centroid of cluster
+            if (TAG==PIXEL_INTENSITY_TAG){
+                auto image = clusterData.find(images.at(position).getFilename());
+                PIclusters.at(k).setCentroid(image->first,image->second);
+            } else if(TAG==RGB_TAG){
+                auto image = RGBclusterData.find(images.at(position).getFilename());
+                RGBclusters.at(k).setCentroid(image->first,image->second);
+            }         
+            
+        }      
+        
+        // Print results        
+        for (size_t i = 0; i < noClusters; i++){  
+            cout<<"Cluster ["<<i<<"]"<<endl;          
+            if (TAG==PIXEL_INTENSITY_TAG) cout<<PIclusters.at(i).printSet();
+            else if (TAG==RGB_TAG) cout<<RGBclusters.at(i).printSet();
         }
         return true;
     }
@@ -666,6 +807,7 @@ namespace LCKMAT002{
         using namespace std;
 
         stringstream ss;
+        ss<<"Size "<<s.size()<<endl;
         ss<<"Initial centroid : " <<centroidName <<endl;
         for (auto it = s.begin(); it!=s.end(); it++){
             ss<<it->first;
@@ -842,6 +984,7 @@ namespace LCKMAT002{
         using namespace std;
 
         stringstream ss;
+        ss<<"Size "<<s.size()<<endl;
         ss<<"Initial centroid : " <<centroidName <<endl;
         for (auto it = s.begin(); it!=s.end(); it++){
             ss<<it->first;
