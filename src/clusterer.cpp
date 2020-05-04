@@ -1,6 +1,18 @@
 #include "Cluster.h"
 #include "PPM.h"
 
+#define RANDOM_CENTROIDS 0
+#define IMAGES_TO_RANDOM_CLUSTERS 1
+
+/**
+ * Determine if string is a number
+ * 
+ * Only returns true for positive numbers 
+ *
+ * @param string String whose validity as a number is checked
+ * @return boolean value of true if string is a number
+ */
+
 bool is_number(const std::string& s)
 {
     std::string::const_iterator it = s.begin();
@@ -15,23 +27,51 @@ int main(int argc, char* argv[]){
     int clusters = 10;
     int hgramWidth = 1;
     int tag = PIXEL_INTENSITY_TAG;
+    int iterations = 1;
+    
+    int init = RANDOM_CENTROIDS;
+
+    /* Check to see if user has run the program with the correct arguments
+    * 
+    * Required Arguments:
+    * <dataset> - specify the name of the dataset to be used
+    * 
+    * Optional Arguments
+    * 
+    * [-o ouput]    - 'output' specifies the name of the file to which the final k-means cluster is written to. 
+    *                  The output is not written to a dile by default
+    * 
+    * [-k n]        - 'n' specifies the number of clusters (k) the k-means algorithm is to initialse 
+    *                  k is set to 10 by default
+    * 
+    * [-bin b]      - 'b' specifies the size of the bin when generating histograms for each image
+    *                  The bin size is set to 1 by default
+    * 
+    * [-color c]    - 'c' tells the k-means algorithm whether to consider RGB pixels, or only greyscale pixel. 
+    *                 'rgb' for colour and 'g' for greyscale. 
+    *                  Greyscale is selected by default      
+    * 
+    * [-it n]       - 'n' represents the number of time k-means will be run so that the spread can be minimised 
+    *                  K-means will run once by default
+    *   
+    */
 
     if (argc<2){
-        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
         cout<<"usage: clusterer: error: too few arguments"<<endl;
         return 1;
     }
-    else if (argc>1 && argc < 11){
+    else if (argc>1 && argc < 15){
 
-        for (size_t i = 2; i < argc; i++)
-        {
-            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-color"){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+        // Check validity of input parameters
+        for (size_t i = 2; i < argc; i++){
+            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-color" && string(argv[i])!="-it"&& string(argv[i])!="-init"){
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                 cout<<"usage: clusterer: error: invalid option "<<string(argv[i])<<endl;
                 return 1;
             }
             else if (argc%2!=0){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                 cout<<"usage: clusterer: missing input parameter"<<endl;
                 return 1;
             }
@@ -40,7 +80,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-k") {
                 if(is_number(string(argv[i+1]))) clusters= stoi(string(argv[i+1]));
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                     cout<<"usage: clusterer: invalid number of clusters : "<<string(argv[i+1])<<endl;
                     return 1;
                 }                
@@ -49,13 +89,13 @@ int main(int argc, char* argv[]){
                 if(is_number(string(argv[i+1]))) {
                     if (stoi(string(argv[i+1]))>0 && stoi(string(argv[i+1]))< RGB_COMPONENT_COLOR+1) hgramWidth= stoi(string(argv[i+1]));
                     else{
-                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                         cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                         return 1;
                     }
                 }
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                     cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
@@ -63,88 +103,168 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-color") {
                 if(string(argv[i+1])=="rgb") tag=RGB_TAG;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color feature] "<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
                     cout<<"usage: clusterer: invalid feature selection : "<<(argv[i+1])<<endl;
+                    return 1;
+                }
+            }
+            else if (string(argv[i])=="-it") {
+                if(is_number(string(argv[i+1])) && stoi(string(argv[i+1]))>0 ) iterations= stoi(string(argv[i+1]));
+                else{
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer: invalid number of iterations : "<<string(argv[i+1])<<endl;
+                    return 1;
+                }
+            }
+            else if (string(argv[i])=="-init") {
+                if(string(argv[i+1])=="cent") init=RANDOM_CENTROIDS;
+                else if (string(argv[i+1])=="clust") init = IMAGES_TO_RANDOM_CLUSTERS;
+                else{
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer: invalid initialization of k-means : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
             }
                         
             i++;
         }
-        
+
         cout<<"Output file: "<<outputFile<<endl;
         cout<<"Number of clusters: "<<clusters<<endl;
         cout<<"Width of histogram feature: "<<hgramWidth<<endl;
         
-        // START OF PROGRAM -----------------------------------------------------------------------------------
-        cout<<endl<<"Starting clusterer"<<endl;
+        // Store iterations of K-means
+        std::vector<LCKMAT002::Cluster> iterationSet= std::vector<LCKMAT002::Cluster>(); 
 
-        // LCKMAT002::PPM file("../Gradient_Numbers_PPMS/eight_10.ppm");
-        LCKMAT002::Cluster cluster = LCKMAT002::Cluster();
-        cout<<endl<<"===============Creating Cluster and Reading Images==============="<<endl;
-        if(!cluster.readImages("Gradient_Numbers_PPMS")){
-            cout<<"Error reading images"<<endl;
-            return 1;
-        }
-        cluster.setBinSize(hgramWidth);
-        cout<<"======================================================================="<<endl;
+        // Seeed the random number generator to be used when initialisng k-means
+        srand(time(NULL));
 
-        cout<<endl<<"===============Creating Image Feature==============="<<endl;
-        if (!cluster.generateHistograms(tag)){
-            cout<<"Error generating image feature"<<endl;
-            return 1;
-        }      
-        cout<<"========================================================="<<endl;
+        /* K-means implementation
+        *
+        * The K-means algorithm will now be run for a predetermined number of times.
+        * Each iteration of K-means will be saved and the K-means with the smallest total spread will be selected as the output
+        * 
+        */
 
-        cout<<endl<<"===============Initialising Clusters==============="<<endl;
-        if (!cluster.generateHistograms(tag,clusters)){
-            cout<<"Error generating clusters"<<endl;
-            return 1;
-        }      
-        cout<<"================================================="<<endl;
+        for (size_t i = 0; i < iterations; i++){
+            // // START OF PROGRAM -----------------------------------------------------------------------------------
+            cout<<endl<<"Starting clusterer"<<endl;
+            
+            LCKMAT002::Cluster cluster = LCKMAT002::Cluster();
 
-        cout<<endl<<"===============Iterating Through Clusters==============="<<endl;
-        cout<<endl;  
-        int it = 0;
+            cout<<endl<<"===============Creating Cluster and Reading Images==============="<<endl;
 
-        cout<<"-----Iteration "<<++it<<"-----"<<endl; 
-        // The first iteration should incur any moves 
-        if (!cluster.iterateClusters(tag)){
-            cout<<"Error generating clusters"<<endl;
-            return 1;
-        }
-        cout<<"----------"<<endl<<endl;        
-        it++;
-        // Iterartions there after might move from one set to another  
-        cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        while (cluster.iterateClusters(tag)){
-            it++;
-            cout<<"----------"<<endl<<endl;
-            cout<<"-----Iteration "<<it<<"-----"<<endl; 
-        }  
-        cout<<"----------"<<endl<<endl;
-
-        cout<<"Number of iterations:"<<it<<endl;
-
-        cout<<"================================================="<<endl;       
-
-        if (outputFile.size()!=0)
-        {
-            cout<<endl<<"===============Writing to Output File==============="<<endl;
-            ofstream myfile;
-            string fileName = "../bin/"+outputFile;
-            myfile.open (fileName);
-            if (!myfile.is_open()){
-                cout<<"Error writing output to "<<fileName<<endl;
+            // Finds all the images and stores them as PPM objects
+            if(!cluster.readImages("Gradient_Numbers_PPMS")){
+                cout<<"Error reading images"<<endl;
                 return 1;
             }
-            cout<<"Writing to "<<fileName<<endl;            
-            myfile << cluster;
-            myfile.close();
-            cout<<"================================================="<<endl;
-        }
-        
 
+            //Sets the bin size as specified by the user
+            cluster.setBinSize(hgramWidth);
+
+            cout<<"======================================================================="<<endl;
+
+            cout<<endl<<"===============Creating Image Feature==============="<<endl;
+
+            /* Histogram generation
+            *
+            * Histograms will be produced according the 'color' parameter as specified by the user
+            * Selecting the RGB option will result in the generation of histograms taking longer than when compare to using greyscale
+            */
+
+            if (!cluster.generateHistograms(tag)){
+                cout<<"Error generating image feature"<<endl;
+                return 1;
+            }     
+
+            cout<<"========================================================="<<endl;
+
+            cout<<endl<<"===============Populating Clusters==============="<<endl;
+
+            /* Random Centroids
+            *
+            * If the user has selected to initialse using random centroids, random images will be selected as centroids for clusters.
+            * One unique image is selected as centroid for every cluster
+            */
+
+            if (init==RANDOM_CENTROIDS){
+                if (!cluster.randomCentroids(tag,clusters,rand())){
+                    cout<<"Error generating clusters"<<endl;
+                    return 1;
+                } 
+            } 
+            
+            /* Images to random clusters
+            *
+            * If the user has selected to initialse k-means by randomly assigning images to clusters:
+            * Instead of selecting random images as centroids, images will be distributed randomly and evenly between clusters
+            * Centroids will then be computed using these newly created clusters
+            */
+
+            else if (init==IMAGES_TO_RANDOM_CLUSTERS){
+                if (!cluster.pointsToRandomClusters(tag,clusters,rand())){
+                    cout<<"Error generating clusters"<<endl;
+                    return 1;
+                } 
+            }
+                 
+            cout<<"================================================="<<endl;
+
+            cout<<endl<<"===============Iterating Through Clusters==============="<<endl;
+            cout<<endl;  
+            int it = 0;
+
+            /* Iterate k-means
+            *
+            * Check every image to see which cluster they are most similar to
+            * If any images are moved between clusters, the algorithm will return true
+            * We will continue to iterate while images the algorithm returns true
+            */
+
+            cout<<"-----Iteration "<<++it<<"-----"<<endl; 
+            while (cluster.iterateClusters(tag)){
+                it++;
+                cout<<"----------"<<endl<<endl;
+                cout<<"-----Iteration "<<it<<"-----"<<endl; 
+            }  
+            cout<<"----------"<<endl<<endl;
+
+            cout<<"Number of iterations:"<<it<<endl;
+
+            cout<<"================================================="<<endl; 
+
+            // Display the spread of the clusters 
+            cout<<endl<<"===============Spread of Cluster==============="<<endl;
+            cout<<"Spread of cluster : "<<cluster.getSpread(tag)<<endl;    
+            cout<<"================================================="<<endl;
+
+            iterationSet.push_back(cluster);
+        }
+
+        /* Select best K-means iteration
+        *
+        * Check the spread of all K-means iterations
+        * Select the iteration with the lowest spread
+        */
+
+        cout<<endl<<"===============Spread of All Cluster Iterations==============="<<endl;
+        double smallest_spread=iterationSet.at(0).getSpread(tag);
+        int bestPerformingIteration=0;
+        for (size_t i = 0; i < iterationSet.size(); i++){
+            cout<<"K-means iteration "<<i+1<<" : "<<iterationSet.at(i).getSpread(tag)<<endl;  
+            if(iterationSet.at(i).getSpread(tag)<smallest_spread){
+                smallest_spread = iterationSet.at(i).getSpread(tag);
+                bestPerformingIteration= i;
+            }
+        }  
+        cout<<endl;
+        cout<<"Best performing iteration : "<<bestPerformingIteration+1<<" with " << smallest_spread<<" spread"<<endl;       
+        cout<<"================================================="<<endl;
+
+        cout<<endl<<"===============Final K-Means Clustering ==============="<<endl;
+        cout<<iterationSet.at(bestPerformingIteration);     
+        cout<<"================================================="<<endl;
 
         // END OF PROGRAM -------------------------------------------------------------------------------------
         

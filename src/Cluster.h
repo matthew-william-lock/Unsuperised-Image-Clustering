@@ -10,6 +10,10 @@
 #include <memory> // C++11
 #include <string>
 #include <cstdio>
+#include <sys/time.h>
+#include <unistd.h>
+#include <sys/types.h>
+
 
 #define PIXEL_INTENSITY_TAG 0
 #define RGB_TAG 1
@@ -36,12 +40,16 @@ namespace LCKMAT002
             void setCentroid(const std::string & name, const std::vector<int> & centroid);
             std::vector<int> getCentroid();
             std::string getCentroidName();
-            
+
+            void add(const std::string & fileName, const std::vector<int> & hisogram);
+            bool contains(std::string name);            
 
             bool findAndDelete(std::string fileName);
             bool findAndDeleteIterator(std::string fileName);
-            void add(const std::string & fileName, const std::vector<int> & hisogram);
+            
             int getSize();
+            double getSpread();
+
             void calcCentroid();
             std::unordered_map<std::string,std::vector<int>> getS();
             std::string printSet();
@@ -68,18 +76,17 @@ namespace LCKMAT002
             void setCentroid(const std::string & name, const std::vector<std::vector<int>> & centroid);
             std::vector<std::vector<int>> getCentroid();
             std::string const getCentroidName();
+            void calcCentroid();
 
             int getSize();
+            double getSpread();
             void add(const std::string & fileName, const std::vector<std::vector<int>> & hisogram);
+            bool contains(std::string name);
 
             bool findAndDelete(std::string fileName);
-            bool findAndDeleteIterator(std::string fileName);
-            // 
-            // 
-            void calcCentroid();
-            // std::unordered_map<std::string,std::vector<int>> getS();
+            bool findAndDeleteIterator(std::string fileName);            
+            
             std::string printSet();
-
             void printSetAndDistances(const std::vector<Cluster::RGBClusterSet> & setOfClusters, const int & clusterNo );
             double distanceRGB(const std::vector<std::vector<int>> & point, const Cluster::RGBClusterSet & set);
             
@@ -126,17 +133,21 @@ namespace LCKMAT002
         // Generate Histograms
         bool generateHistograms(int TAG);
 
-        // Generate Cluster
-        bool generateHistograms(int TAG, int noClusters);
+        // Initialise k-means
+        bool randomCentroids(int TAG, int noClusters,unsigned int seed);
+        bool pointsToRandomClusters(int TAG, int noClusters,unsigned int seed);
 
-        // Generate Cluster
-        bool iterateClusters(int TAG);         
+        // Iterare Cluster
+        bool iterateClusters(int TAG);
 
         // Operator Overloading
         friend std::ostream& operator<<(std::ostream& os, const Cluster& dt);
 
         // Check PIClusters
         bool const isEmptyPI();
+
+        // Geat spread of cluster
+        double getSpread(int TAG);
 
     };
     
