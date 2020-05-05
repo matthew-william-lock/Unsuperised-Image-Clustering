@@ -63,13 +63,13 @@ cd src
 Optional arguments:
 | Parameter                 | Description   |	
 | :------------------------ | :-------------|
-| -i output_file_name(string) | Indicate the name of the file to write the final clustering to. This file will be located in /bin. If no output file is set, the output will be displayed on the terminal
-| -k k_value(int) | Set the number of clusters for K-means.
-| -bin bin_size(int) | Set a valid bin size in the range (1-255)
-| -color image_feature(string) | Set image feature to be used. 'pi' indicates black and white feature space, 'rgb' indicates RGB feature space, 'hsv' indicates HSV feature space
-| -init initialisation_method(string) | Set K-means initialisation method. 'cent' will pick centroids at random, 'clust' will randomly assign images to initial clusters, and 'plus' will implement K-Means++ initialisation method
-| -it number_of_iterations(int) | Number of time K-Means will be run to find best spread
-| -shuff shuffle(string) | Indicates whethere or not to shuffle input data. 't' will shuffle input data while 'f' will read the input data in order
+| -i output_file_name | Indicate the name of the file to write the final clustering to. This file will be located in /bin. If no output file is set, the output will be displayed on the terminal
+| -k k_value | Set the number of clusters for K-means.
+| -bin bin_size | Set a valid bin size in the range (1-255)
+| -color image_feature | Set image feature to be used. 'pi' indicates black and white feature space, 'rgb' indicates RGB feature space, 'hsv' indicates HSV feature space
+| -init initialisation_method | Set K-means initialisation method. 'cent' will pick centroids at random, 'clust' will randomly assign images to initial clusters, and 'plus' will implement K-Means++ initialisation method
+| -it number_of_iterations | Number of time K-Means will be run to find best spread
+| -shuff shuffle | Indicates whethere or not to shuffle input data. 't' will shuffle input data while 'f' will read the input data in order
 
 **Example Usages:**
 ```
