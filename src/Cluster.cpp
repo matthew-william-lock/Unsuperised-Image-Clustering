@@ -32,11 +32,11 @@ namespace LCKMAT002{
         return result;
     }
 
-    bool Cluster::readImages(const std::string & directoryName){
+    bool Cluster::readImages(const std::string & directoryName, const bool & shuffle){
         using namespace std;
 
         // Get string of fileNames
-        string fileNamesString = exec("ls ../"+directoryName+"/*.ppm "); // Get full directory
+        string fileNamesString = exec("ls ../"+directoryName+"/*.ppm | xargs -n 1 basename "); // only get image names
 
         if (fileNamesString.length()==0){
             cout<<"No ppm files found in "<<directoryName<<endl;
@@ -50,9 +50,10 @@ namespace LCKMAT002{
         while (stringStream){
             getline(stringStream,fileName,'\n');
             if (fileName.length()>1){
-                LCKMAT002::PPM imageFile(fileName);
+                string location = "../"+directoryName+"/"+fileName; // Set location of the image to be opened
+                LCKMAT002::PPM imageFile(location, fileName);
                 images.push_back(imageFile);
-                std::random_shuffle ( images.begin(), images.end() );
+                if (shuffle) std::random_shuffle ( images.begin(), images.end() );  // Shuffle input data                
                 clusterData[imageFile.getFilename()]=vector<int>();                 // Initialise PI Cluster Data   
                 RGBclusterData[imageFile.getFilename()]=vector<vector<int>>();      // Initialise RGB Cluster Data      
                 count++;
@@ -815,11 +816,9 @@ namespace LCKMAT002{
         using namespace std;
 
         stringstream ss;
-        ss<<"Size "<<s.size()<<endl;
-        ss<<"Initial centroid : " <<centroidName <<endl;
-        for (auto it = s.begin(); it!=s.end(); it++){
+        for (auto it = s.begin(); it!=s.end();){
             ss<<it->first;
-            ss<<endl;    
+            if (++it!=s.end()) ss<<",";
         }
         ss<<endl;
 
@@ -832,7 +831,7 @@ namespace LCKMAT002{
         using namespace std;    
         cout<<"Cluster ["<<clusterNo<<"] "<<centroidName<<endl;
         cout<<"Size "<<s.size()<<endl;
-        cout<<"Set space\t\t\t\t\t\t";
+        cout<<"Set space\t\t";
         for (size_t i = 0; i < setOfClusters.size(); i++)
         {
            cout<<i<<"\t";
@@ -992,11 +991,9 @@ namespace LCKMAT002{
         using namespace std;
 
         stringstream ss;
-        ss<<"Size "<<s.size()<<endl;
-        ss<<"Initial centroid : " <<centroidName <<endl;
-        for (auto it = s.begin(); it!=s.end(); it++){
+        for (auto it = s.begin(); it!=s.end();){
             ss<<it->first;
-            ss<<endl;    
+            if (++it!=s.end()) ss<<",";   
         }
         ss<<endl;
 
@@ -1008,7 +1005,7 @@ namespace LCKMAT002{
         using namespace std;    
         cout<<"Cluster ["<<clusterNo<<"] "<<centroidName<<endl;
         cout<<"Size "<<s.size()<<endl;
-        cout<<"Set space\t\t\t\t\t\t";
+        cout<<"Set space\t\t";
         for (size_t i = 0; i < setOfClusters.size(); i++)
         {
            cout<<i<<"\t";
@@ -1058,14 +1055,16 @@ namespace LCKMAT002{
 
         if (rgb.size()>0){
             for (size_t i = 0; i < rgb.size(); i++){
-                os<<"Set "<<i+1<<std::endl;
+                os<<"Cluster "<<i+1<<": ";
                 os<<rgb.at(i).printSet();   
+                os<<std::endl;
             }
             
         } else {
             for (size_t i = 0; i < pi.size(); i++){
-                os<<"Set "<<i+1<<std::endl;
+                os<<"Cluster "<<i+1<<": ";
                 os<<pi.at(i).printSet();   
+                os<<std::endl;
             }
         }
 

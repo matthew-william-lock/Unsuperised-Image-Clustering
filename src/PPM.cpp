@@ -4,16 +4,16 @@ namespace LCKMAT002 {
 
     using namespace std;
 
-    PPM::PPM(const std::string &filename){
+    PPM::PPM(const std::string &location,const std::string &filename){
         using namespace std;
         fileName=filename;
 
         cout<<"Opening file "<<filename<<endl;
-        ifstream fileStream(filename, ios::binary|ios::in );
+        ifstream fileStream(location, ios::binary|ios::in );
 
         // Check if file is open
         if (!fileStream.is_open()){
-            cout<<"Error opening file "<<filename<<endl;
+            cout<<"Error opening file "<<location<<endl;
             exit(1);
         }
 

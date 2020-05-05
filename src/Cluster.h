@@ -126,7 +126,7 @@ namespace LCKMAT002
         ~Cluster();
 
         // Read PPM images to gather image data
-        bool readImages(const std::string & directoryName);
+        bool readImages(const std::string & directoryName,const bool & shuffle);
 
         // Set binSize
         void setBinSize(const int & binSize);

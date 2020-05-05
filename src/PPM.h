@@ -25,7 +25,7 @@ namespace LCKMAT002{
         std::string fileName;
 
     public:
-        PPM(const std::string & filename);
+        PPM(const std::string & location,const std::string & filename);
         ~PPM();
 
         unsigned char getBWPixel(int y, int x);

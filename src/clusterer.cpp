@@ -25,10 +25,12 @@ int main(int argc, char* argv[]){
     using namespace std;
 
     std::string outputFile=std::string("");
+    std::string datasetLocation=std::string("");
     int clusters = 10;
     int hgramWidth = 1;
     int tag = PIXEL_INTENSITY_TAG;
     int iterations = 10;
+    bool shuffle = false;
     
     int init = K_MEANS_PLUS;
 
@@ -49,34 +51,42 @@ int main(int argc, char* argv[]){
     *                  The bin size is set to 1 by default
     * 
     * [-color c]    - 'c' tells the k-means algorithm whether to consider RGB pixels, or only greyscale pixel. 
-    *                 'rgb' for colour and g' for greyscale. 
+    *                  c ='rgb' for colour and c = 'g' for greyscale. 
     *                  Greyscale is selected by default      
     * 
     * [-it n]       - 'n' represents the number of time k-means will be run so that the spread can be minimised 
     *                  K-means will run 10 times by default
     * 
     * [-init i]     - 'i' represents the method of initalization for k-means
-    *                 'cent' for random centroid initalization, 'clust' for assigning images to random clusters, 'plus' for k-means+ method
-    *                 K-means+ is default method (used weighted probabilsted funtion to select centroids, is more ideal than standard K-means)  
+    *                  i= 'cent' for random centroid initalization, i='clust' for assigning images to random clusters, 'plus' for k-means+ method
+    *                  K-means+ is default method (used weighted probabilsted funtion to select centroids, is more ideal than standard K-means)  
+    * 
+    * [-shuff b]    - 'b' represents a bool telling the k-means whether to shuffle the input data or not
+    *                  b = 't' will cause the input data to shuffle, b = 'f' will keep the input data in it's original order
+    *                  This allows the user to shuffle the input data and eliminate any biased caused by ordering of data
+    *                  The input data will by default not be shuffled
     *   
     */
 
     if (argc<2){
-        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
         cout<<"usage: clusterer: error: too few arguments"<<endl;
         return 1;
     }
-    else if (argc>1 && argc < 15){
+    else if (argc>1 && argc < 17){
+
+        // Set dataset location
+        datasetLocation= string(argv[1]);
 
         // Check validity of input parameters
         for (size_t i = 2; i < argc; i++){
-            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-color" && string(argv[i])!="-it"&& string(argv[i])!="-init"){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+            if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-color" && string(argv[i])!="-it"&& string(argv[i])!="-init"&& string(argv[i])!="-shuff"){
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                 cout<<"usage: clusterer: error: invalid option "<<string(argv[i])<<endl;
                 return 1;
             }
             else if (argc%2!=0){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                 cout<<"usage: clusterer: missing input parameter"<<endl;
                 return 1;
             }
@@ -85,7 +95,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-k") {
                 if(is_number(string(argv[i+1]))) clusters= stoi(string(argv[i+1]));
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid number of clusters : "<<string(argv[i+1])<<endl;
                     return 1;
                 }                
@@ -94,13 +104,13 @@ int main(int argc, char* argv[]){
                 if(is_number(string(argv[i+1]))) {
                     if (stoi(string(argv[i+1]))>0 && stoi(string(argv[i+1]))< RGB_COMPONENT_COLOR+1) hgramWidth= stoi(string(argv[i+1]));
                     else{
-                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                         cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                         return 1;
                     }
                 }
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
@@ -108,7 +118,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-color") {
                 if(string(argv[i+1])=="rgb") tag=RGB_TAG;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid feature selection : "<<(argv[i+1])<<endl;
                     return 1;
                 }
@@ -116,7 +126,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-it") {
                 if(is_number(string(argv[i+1])) && stoi(string(argv[i+1]))>0 ) iterations= stoi(string(argv[i+1]));
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid number of iterations : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
@@ -126,8 +136,17 @@ int main(int argc, char* argv[]){
                 else if (string(argv[i+1])=="clust") init = IMAGES_TO_RANDOM_CLUSTERS;
                 else if (string(argv[i+1])=="plus") init = K_MEANS_PLUS;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid initialization of k-means : "<<string(argv[i+1])<<endl;
+                    return 1;
+                }
+            }
+            else if (string(argv[i])=="-shuff") {
+                if(string(argv[i+1])=="t") shuffle=true;
+                else if (string(argv[i+1])=="f") shuffle=false;
+                else{
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer: invalid shuffle argument : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
             }
@@ -166,7 +185,7 @@ int main(int argc, char* argv[]){
             * Shuffles images to make sure clustering is not favoured by initial ordering of images
             */
            
-            if(!cluster.readImages("Gradient_Numbers_PPMS")){
+            if(!cluster.readImages(datasetLocation,shuffle)){
                 cout<<"Error reading images"<<endl;
                 return 1;
             }
