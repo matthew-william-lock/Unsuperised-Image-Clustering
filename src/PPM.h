@@ -1,11 +1,12 @@
 #ifndef PPM_h
 #define PPM_h
 
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <math.h> // cos (x)
 
 namespace LCKMAT002{
 
@@ -32,6 +33,17 @@ namespace LCKMAT002{
         unsigned char getR(int y, int x);
         unsigned char getG(int y, int x);
         unsigned char getB(int y, int x);
+
+        // HSV Model (https://www.researchgate.net/publication/220595166_Image_Clustering_using_Color_Texture_and_Shape_Features)
+        double getHue(int y, int x);
+        double getSaturation(int y, int x);
+        double getValueIntensity(int y, int x);
+
+        // All HSV values retuned are normalised and will lie between 0 and 1
+        double getNormHue(int y, int x);
+        double getNormSaturation(int y, int x);
+        double getNormValueIntensity(int y, int x);
+
         int getNrows();
         int getNcols();
         std::string const getFilename();

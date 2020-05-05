@@ -76,6 +76,7 @@ namespace LCKMAT002 {
             image[y]=row; 
         }   
         fileStream.close();
+
         cout<<"File closed"<<endl<<endl; 
 
     }
@@ -103,6 +104,86 @@ namespace LCKMAT002 {
     // Return black and white pixel at value X and Y of image
     unsigned char PPM::getBWPixel(int y, int x){
         return 0.21 * image[y][x].red + 0.72 * image[y][x].green + 0.07 * image[y][x].blue;
+    }
+
+    // Return Hue at Pixel X Y (https://www.geeksforgeeks.org/program-change-rgb-color-model-hsv-color-model/)
+    // Code for determining HSV inspired and adapted from source above
+
+    double PPM::getHue(int y, int x){
+        double R = double(image[y][x].red) / RGB_COMPONENT_COLOR; 
+        double G = double(image[y][x].green) / RGB_COMPONENT_COLOR; 
+        double B = double(image[y][x].blue) / RGB_COMPONENT_COLOR; 
+
+        double cmax = max(R, max(G, B)); // maximum of r, g, b 
+        double cmin = min(R, min(G, B)); // minimum of r, g, b 
+        double diff = cmax - cmin; // diff of cmax and cmin. 
+        double h = -1; 
+
+        // if cmax and cmax are equal then h = 0 
+        if (cmax == cmin) 
+            h = 0; 
+  
+        // if cmax equal r then compute h 
+        else if (cmax == R)         
+            h = fmod ((60 * ((G - B) / diff) + 360) ,360);
+  
+        // if cmax equal g then compute h 
+        else if (cmax == G) 
+            h =  fmod ((60 * ((B - R) / diff) + 120) ,360); 
+  
+        // if cmax equal b then compute h 
+        else if (cmax == B)             
+            h =  fmod ((60 * ((R - G) / diff) + 240) ,360); 
+
+        return h;
+
+    }
+
+    // Return saturation at Pixel X Y
+    double PPM::getSaturation(int y, int x){
+        double R = double(image[y][x].red) / RGB_COMPONENT_COLOR; 
+        double G = double(image[y][x].green) / RGB_COMPONENT_COLOR; 
+        double B = double(image[y][x].blue) / RGB_COMPONENT_COLOR;
+
+        double cmax = max(R, max(G, B)); // maximum of r, g, b 
+        double cmin = min(R, min(G, B)); // minimum of r, g, b 
+        double diff = cmax - cmin; // diff of cmax and cmin. 
+        double s = -1; 
+
+        // if cmax equal zero 
+        if (cmax == 0) 
+            s = 0; 
+        else
+            s = (diff / cmax) * 100;
+
+        return s;
+    }
+
+    // Return value of intensity at Pixel X Y
+    double PPM::getValueIntensity(int y, int x){
+        double R = double(image[y][x].red) / RGB_COMPONENT_COLOR; 
+        double G = double(image[y][x].green) / RGB_COMPONENT_COLOR; 
+        double B = double(image[y][x].blue) / RGB_COMPONENT_COLOR; 
+
+        double cmax = max(R, max(G, B)); // maximum of r, g, b 
+
+        double v = cmax * 100; 
+        return v;
+    }
+
+     // Return Normalised hue at Pixel X Y
+    double PPM::getNormHue(int y, int x){
+        return getHue(y,x)/360;
+    }
+
+    // Return Normalised saturation at Pixel X Y
+    double PPM::getNormSaturation(int y, int x){
+        return getSaturation(y,x)/100;
+    }
+
+    // Return Normalised value of intensity at Pixel X Y
+    double PPM::getNormValueIntensity(int y, int x){
+        return getValueIntensity(y,x)/100;
     }
 
     std::string const PPM::getFilename(){

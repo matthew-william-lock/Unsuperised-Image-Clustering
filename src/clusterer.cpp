@@ -117,6 +117,7 @@ int main(int argc, char* argv[]){
             }
             else if (string(argv[i])=="-color") {
                 if(string(argv[i+1])=="rgb") tag=RGB_TAG;
+                else if(string(argv[i+1])=="hsv") tag=HSV_TAG   ;
                 else{
                     cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid feature selection : "<<(argv[i+1])<<endl;
@@ -210,73 +211,73 @@ int main(int argc, char* argv[]){
 
             cout<<"========================================================="<<endl;
 
-            cout<<endl<<"===============Populating Clusters==============="<<endl;
+            // cout<<endl<<"===============Populating Clusters==============="<<endl;
 
-            /* Random Centroids
-            *
-            * If the user has selected to initialse using random centroids, random images will be selected as centroids for clusters.
-            * One unique image is selected as centroid for every cluster
-            */
+            // /* Random Centroids
+            // *
+            // * If the user has selected to initialse using random centroids, random images will be selected as centroids for clusters.
+            // * One unique image is selected as centroid for every cluster
+            // */
 
-            if (init==RANDOM_CENTROIDS){
-                if (!cluster.randomCentroids(tag,clusters,rand())){
-                    cout<<"Error generating clusters"<<endl;
-                    return 1;
-                } 
-            } 
+            // if (init==RANDOM_CENTROIDS){
+            //     if (!cluster.randomCentroids(tag,clusters,rand())){
+            //         cout<<"Error generating clusters"<<endl;
+            //         return 1;
+            //     } 
+            // } 
             
-            /* Images to random clusters
-            *
-            * If the user has selected to initialse k-means by randomly assigning images to clusters:
-            * Instead of selecting random images as centroids, images will be distributed randomly and evenly between clusters
-            * Centroids will then be computed using these newly created clusters
-            */
+            // /* Images to random clusters
+            // *
+            // * If the user has selected to initialse k-means by randomly assigning images to clusters:
+            // * Instead of selecting random images as centroids, images will be distributed randomly and evenly between clusters
+            // * Centroids will then be computed using these newly created clusters
+            // */
 
-            else if (init==IMAGES_TO_RANDOM_CLUSTERS){
-                if (!cluster.pointsToRandomClusters(tag,clusters,rand())){
-                    cout<<"Error generating clusters"<<endl;
-                    return 1;
-                } 
-            }
+            // else if (init==IMAGES_TO_RANDOM_CLUSTERS){
+            //     if (!cluster.pointsToRandomClusters(tag,clusters,rand())){
+            //         cout<<"Error generating clusters"<<endl;
+            //         return 1;
+            //     } 
+            // }
 
-            else if (init == K_MEANS_PLUS){
-                if (!cluster.kMeansPlus(tag,clusters,rand())){
-                    cout<<"Error generating clusters"<<endl;
-                    return 1;
-                } 
-            }
+            // else if (init == K_MEANS_PLUS){
+            //     if (!cluster.kMeansPlus(tag,clusters,rand())){
+            //         cout<<"Error generating clusters"<<endl;
+            //         return 1;
+            //     } 
+            // }
                  
-            cout<<"================================================="<<endl;
+            // cout<<"================================================="<<endl;
 
-            cout<<endl<<"===============Iterating Through Clusters==============="<<endl;
-            cout<<endl;  
-            int it = 0;
+            // cout<<endl<<"===============Iterating Through Clusters==============="<<endl;
+            // cout<<endl;  
+            // int it = 0;
 
-            /* Iterate k-means
-            *
-            * Check every image to see which cluster they are most similar to
-            * If any images are moved between clusters, the algorithm will return true
-            * We will continue to iterate while images the algorithm returns true
-            */
+            // /* Iterate k-means
+            // *
+            // * Check every image to see which cluster they are most similar to
+            // * If any images are moved between clusters, the algorithm will return true
+            // * We will continue to iterate while images the algorithm returns true
+            // */
 
-            cout<<"-----Iteration "<<++it<<"-----"<<endl; 
-            while (cluster.iterateClusters(tag)){
-                it++;
-                cout<<"----------"<<endl<<endl;
-                cout<<"-----Iteration "<<it<<"-----"<<endl; 
-            }  
-            cout<<"----------"<<endl<<endl;
+            // cout<<"-----Iteration "<<++it<<"-----"<<endl; 
+            // while (cluster.iterateClusters(tag)){
+            //     it++;
+            //     cout<<"----------"<<endl<<endl;
+            //     cout<<"-----Iteration "<<it<<"-----"<<endl; 
+            // }  
+            // cout<<"----------"<<endl<<endl;
 
-            cout<<"Number of iterations:"<<it<<endl;
+            // cout<<"Number of iterations:"<<it<<endl;
 
-            cout<<"================================================="<<endl; 
+            // cout<<"================================================="<<endl; 
 
-            // Display the spread of the clusters 
-            cout<<endl<<"===============Spread of Cluster==============="<<endl;
-            cout<<"Spread of cluster : "<<cluster.getSpread(tag)<<endl;    
-            cout<<"================================================="<<endl;
+            // // Display the spread of the clusters 
+            // cout<<endl<<"===============Spread of Cluster==============="<<endl;
+            // cout<<"Spread of cluster : "<<cluster.getSpread(tag)<<endl;    
+            // cout<<"================================================="<<endl;
 
-            iterationSet.push_back(cluster);
+            // iterationSet.push_back(cluster);
         }
 
         /* Select best K-means iteration
@@ -285,23 +286,23 @@ int main(int argc, char* argv[]){
         * Select the iteration with the lowest spread
         */
 
-        cout<<endl<<"===============Spread of All Cluster Iterations==============="<<endl;
-        double smallest_spread=iterationSet.at(0).getSpread(tag);
-        int bestPerformingIteration=0;
-        for (size_t i = 0; i < iterationSet.size(); i++){
-            cout<<"K-means iteration "<<i+1<<" : "<<iterationSet.at(i).getSpread(tag)<<endl;  
-            if(iterationSet.at(i).getSpread(tag)<smallest_spread){
-                smallest_spread = iterationSet.at(i).getSpread(tag);
-                bestPerformingIteration= i;
-            }
-        }  
-        cout<<endl;
-        cout<<"Best performing iteration : "<<bestPerformingIteration+1<<" with " << smallest_spread<<" spread"<<endl;       
-        cout<<"================================================="<<endl;
+        // cout<<endl<<"===============Spread of All Cluster Iterations==============="<<endl;
+        // double smallest_spread=iterationSet.at(0).getSpread(tag);
+        // int bestPerformingIteration=0;
+        // for (size_t i = 0; i < iterationSet.size(); i++){
+        //     cout<<"K-means iteration "<<i+1<<" : "<<iterationSet.at(i).getSpread(tag)<<endl;  
+        //     if(iterationSet.at(i).getSpread(tag)<smallest_spread){
+        //         smallest_spread = iterationSet.at(i).getSpread(tag);
+        //         bestPerformingIteration= i;
+        //     }
+        // }  
+        // cout<<endl;
+        // cout<<"Best performing iteration : "<<bestPerformingIteration+1<<" with " << smallest_spread<<" spread"<<endl;       
+        // cout<<"================================================="<<endl;
 
-        cout<<endl<<"===============Final K-Means Clustering ==============="<<endl;
-        cout<<iterationSet.at(bestPerformingIteration);     
-        cout<<"================================================="<<endl;
+        // cout<<endl<<"===============Final K-Means Clustering ==============="<<endl;
+        // cout<<iterationSet.at(bestPerformingIteration);     
+        // cout<<"================================================="<<endl;
 
         // END OF PROGRAM -------------------------------------------------------------------------------------
         

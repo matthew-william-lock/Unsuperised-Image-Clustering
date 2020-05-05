@@ -18,6 +18,7 @@
 
 #define PIXEL_INTENSITY_TAG 0
 #define RGB_TAG 1
+#define HSV_TAG 2
 
 namespace LCKMAT002
 {
@@ -95,6 +96,39 @@ namespace LCKMAT002
 
         //===========================================================================================
 
+        // Nested class to hold HSV cluster sets ========================================================
+
+        class HSVClusterSet
+        {
+        private:
+            std::unordered_map<std::string,std::vector<std::vector<int>>> s;
+            std::vector<std::vector<int>> centroid;
+            std::string centroidName;
+        public:
+            HSVClusterSet(/* args */);
+            ~HSVClusterSet();
+
+            void setCentroid(const std::string & name, const std::vector<std::vector<int>> & centroid);
+            std::vector<std::vector<int>> getCentroid();
+            std::string const getCentroidName();
+            void calcCentroid();
+
+            int getSize();
+            double getSpread();
+            void add(const std::string & fileName, const std::vector<std::vector<int>> & hisogram);
+            bool contains(std::string name);
+
+            bool findAndDelete(std::string fileName);
+            bool findAndDeleteIterator(std::string fileName);            
+            
+            std::string printSet();
+            void printSetAndDistances(const std::vector<Cluster::HSVClusterSet> & setOfClusters, const int & clusterNo );
+            double distanceHSV(const std::vector<std::vector<int>> & point, const Cluster::HSVClusterSet & set);
+            
+        };      
+
+        //===========================================================================================
+
         // Perform unix terminal commands and pipe back to program
         std::string exec(std::string command);
     
@@ -107,6 +141,7 @@ namespace LCKMAT002
 
         std::unordered_map<std::string,std::vector<int>> clusterData; // PI Cluster data
         std::unordered_map<std::string,std::vector<std::vector<int>>> RGBclusterData; // RGB Cluster data
+        std::unordered_map<std::string,std::vector<std::vector<int>>> HSVclusterData; // HSV Cluster data
 
         std::vector<LCKMAT002::PPM> images; // PPM image data
         int binSize; 
