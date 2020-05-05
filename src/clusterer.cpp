@@ -81,7 +81,7 @@ int main(int argc, char* argv[]){
     */
 
     if (argc<2){
-        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
         cout<<"usage: clusterer: error: too few arguments"<<endl;
         return 1;
     }
@@ -93,12 +93,12 @@ int main(int argc, char* argv[]){
         // Check validity of input parameters
         for (size_t i = 2; i < argc; i++){
             if (string(argv[i])!="-o" && string(argv[i])!="-k" && string(argv[i])!="-bin" && string(argv[i])!="-color" && string(argv[i])!="-it"&& string(argv[i])!="-init"&& string(argv[i])!="-shuff"){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                 cout<<"usage: clusterer: error: invalid option "<<string(argv[i])<<endl;
                 return 1;
             }
             else if (argc%2!=0){
-                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                 cout<<"usage: clusterer: missing input parameter"<<endl;
                 return 1;
             }
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-k") {
                 if(is_number(string(argv[i+1]))) clusters= stoi(string(argv[i+1]));
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid number of clusters : "<<string(argv[i+1])<<endl;
                     return 1;
                 }                
@@ -116,22 +116,23 @@ int main(int argc, char* argv[]){
                 if(is_number(string(argv[i+1]))) {
                     if (stoi(string(argv[i+1]))>0 && stoi(string(argv[i+1]))< RGB_COMPONENT_COLOR+1) hgramWidth= stoi(string(argv[i+1]));
                     else{
-                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                        cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                         cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                         return 1;
                     }
                 }
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid width of histogram feature : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
             }
             else if (string(argv[i])=="-color") {
                 if(string(argv[i+1])=="rgb") tag=RGB_TAG;
+                else if(string(argv[i+1])=="pi") tag=PIXEL_INTENSITY_TAG;
                 else if(string(argv[i+1])=="hsv") tag=HSV_TAG   ;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid feature selection : "<<(argv[i+1])<<endl;
                     return 1;
                 }
@@ -139,7 +140,7 @@ int main(int argc, char* argv[]){
             else if (string(argv[i])=="-it") {
                 if(is_number(string(argv[i+1])) && stoi(string(argv[i+1]))>0 ) iterations= stoi(string(argv[i+1]));
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid number of iterations : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
@@ -149,7 +150,7 @@ int main(int argc, char* argv[]){
                 else if (string(argv[i+1])=="clust") init = IMAGES_TO_RANDOM_CLUSTERS;
                 else if (string(argv[i+1])=="plus") init = K_MEANS_PLUS;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid initialization of k-means : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
@@ -158,7 +159,7 @@ int main(int argc, char* argv[]){
                 if(string(argv[i+1])=="t") shuffle=true;
                 else if (string(argv[i+1])=="f") shuffle=false;
                 else{
-                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-it n] [-shuff b] [-shuff b]"<<endl; 
+                    cout<<"usage: clusterer <dataset> [-o output] [-k n] [-bin b] [-color c] [-init i] [-it n] [-shuff b] [-shuff b]"<<endl; 
                     cout<<"usage: clusterer: invalid shuffle argument : "<<string(argv[i+1])<<endl;
                     return 1;
                 }
