@@ -313,8 +313,22 @@ int main(int argc, char* argv[]){
         cout<<"Best performing iteration : "<<bestPerformingIteration+1<<" with " << smallest_spread<<" spread"<<endl;       
         cout<<"================================================="<<endl;
 
-        cout<<endl<<"===============Final K-Means Clustering ==============="<<endl;
-        cout<<iterationSet.at(bestPerformingIteration);     
+        if (outputFile.size()!=0)
+        {
+            cout<<endl<<"===============Writing to Output ==============="<<endl;
+            ofstream myfile;
+            string fileName = "../bin/"+outputFile;
+            myfile.open (fileName);
+            if (!myfile.is_open()){
+                cout<<"Error writing output to "<<fileName<<endl;
+                return 1;
+            }
+            cout<<"Writing to "<<fileName<<endl;            
+            myfile << iterationSet.at(bestPerformingIteration);
+            myfile.close();
+        } else{
+            cout<<iterationSet.at(bestPerformingIteration); 
+        }
         cout<<"================================================="<<endl;
 
         // END OF PROGRAM -------------------------------------------------------------------------------------

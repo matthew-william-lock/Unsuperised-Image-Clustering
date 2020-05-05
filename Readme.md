@@ -2,7 +2,7 @@
 *Disclaimer : This is a markdown document and should be read using a  [markdown editor](https://stackedit.io/app#)*
 
 This program makes use of the K-Means clustering to group any number of PPM images provided by the user.
-Functionality of features of this K-Means implementation include:
+<br>Functionality of features of this K-Means implementation include:
 - Ability to work on dataset of any size
 - Ability to manipulate basic K-means parameters
 - Ability run K-Means a specified number of times to find best clustering of data
@@ -19,19 +19,19 @@ Add the follow argument when running program to use RGB image space:
 ```
 
 ### HSV Hisograms
-One can convert the RGB space to an HSV (Hue, Saturation and Value Intensity) space. This will allow the program to more finely distinguish between images as there is less overall variations in parameters such as hue as compared to simply counting the number of RGB pixels. In testing the given dataset, K-Means was found to best cluster the 100 images of various digits using the HSV image feature with a bin size of 70. We can run the program with these parameters as follows:
+One can convert the RGB space to an HSV (Hue, Saturation and Value Intensity) space. This will allow the program to more finely distinguish between images as there is less overall variations in parameters such as hue as compared to simply counting the number of RGB pixels. In testing the given dataset, K-Means was found to best cluster the 100 images of various digits using the HSV image feature with a bin size of roughly 70. We can run the program with these parameters as follows:
 ```
 ./clusterer Gradient_Numbers_PPMS -bin 70 -color hsv    
 ```
 
-The inspiration for the HSV image feature was taken from [Image Clustering using Color, Texture and Shape Features](https://www.researchgate.net/publication/220595166_Image_Clustering_using_Color_Texture_and_Shape_Features), while the algorithm to convert from RGB to HSV can be found [here] (https://www.geeksforgeeks.org/program-change-rgb-color-model-hsv-color-model/)
+The inspiration for the HSV image feature was taken from [Image Clustering using Color, Texture and Shape Features](https://www.researchgate.net/publication/220595166_Image_Clustering_using_Color_Texture_and_Shape_Features), while the algorithm to convert from RGB to HSV can be found [here](https://www.geeksforgeeks.org/program-change-rgb-color-model-hsv-color-model/)
 
 ## Source files
-**Cluster.cpp:** : Acts as a driver to implement K-Means
-**clusterer.h**: Defines the cluster class which handles all functions related to K-Means
-**volimage.cpp**: Implements the clusterer class
-**PPM.h**: Defines PPM class used to read PPM image files
-**PPM.cpp**: Implements the PPM class
+**Cluster.cpp:** : Acts as a driver to implement K-Means <br>
+**clusterer.h**: Defines the cluster class which handles all functions related to K-Means<br>
+**volimage.cpp**: Implements the clusterer class<br>
+**PPM.h**: Defines PPM class used to read PPM image files<br>
+**PPM.cpp**: Implements the PPM class<br>
 
 ## Installation
 **Step 1:** Compile Cluster
