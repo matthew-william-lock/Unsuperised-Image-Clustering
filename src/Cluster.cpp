@@ -219,8 +219,7 @@ namespace LCKMAT002{
                                 V_found=true;
                             }
                             HSVclusterData[image.getFilename()]=HSV_temp;   
-                        }
-                        
+                        }                       
                                      
                     }
                 }                 
@@ -309,6 +308,7 @@ namespace LCKMAT002{
 
         if (TAG==PIXEL_INTENSITY_TAG) numberOfImages = clusterData.size();
         else if (TAG==RGB_TAG) numberOfImages = RGBclusterData.size();        
+        else if (TAG==HSV_TAG) numberOfImages = HSVclusterData.size();  
 
         // Instantiate clusters
         for (size_t i = 0; i < noClusters; i++){
@@ -319,6 +319,10 @@ namespace LCKMAT002{
             else if (TAG==RGB_TAG) {
                 RGBClusterSet RGBcluster = RGBClusterSet();
                 RGBclusters.push_back(RGBcluster);
+            }
+            else if (TAG==HSV_TAG) {
+                HSVClusterSet HSVcluster = HSVClusterSet();
+                HSVclusters.push_back(HSVcluster);
             }
         }        
 
@@ -351,7 +355,11 @@ namespace LCKMAT002{
                 RGBclusters.at(counter).add(image->first,image->second);
                 RGBclusters.at(counter).calcCentroid(); 
                 distancesRGB.at(randNum)= RGBclusters.at(counter).distanceRGB(image->second,RGBclusters.at(counter));
-            }   
+            } else if (TAG==HSV_TAG){
+                auto image = HSVclusterData.find(images.at(randNum).getFilename());
+                HSVclusters.at(counter).add(image->first,image->second);
+                HSVclusters.at(counter).calcCentroid(); 
+            } 
 
             // Cycle cluster
             counter++;
@@ -363,6 +371,7 @@ namespace LCKMAT002{
         for (size_t i = 0; i < noClusters; i++){            
             if (TAG==PIXEL_INTENSITY_TAG) cout<<PIclusters.at(i).printSet();
             else if (TAG==RGB_TAG) RGBclusters.at(i).printSetAndDistances(RGBclusters,i);
+            else if (TAG==HSV_TAG) HSVclusters.at(i).printSetAndDistances(HSVclusters,i);
         }
         return true;
     }
@@ -375,6 +384,7 @@ namespace LCKMAT002{
 
         if (TAG==PIXEL_INTENSITY_TAG) numberOfImages = clusterData.size();
         else if (TAG==RGB_TAG) numberOfImages = RGBclusterData.size();
+        else if (TAG==HSV_TAG) numberOfImages = HSVclusterData.size();
 
         /*
 
@@ -406,6 +416,10 @@ namespace LCKMAT002{
                 RGBClusterSet RGBcluster = RGBClusterSet();
                 RGBclusters.push_back(RGBcluster);
             }
+            else if (TAG==HSV_TAG) {
+                HSVClusterSet HSVcluster = HSVClusterSet();
+                HSVclusters.push_back(HSVcluster);
+            }
         } 
 
         // 2.1 Choose one center uniformly at random
@@ -417,7 +431,11 @@ namespace LCKMAT002{
         } else if (TAG==RGB_TAG){
             auto image = RGBclusterData.find(images.at(randNum).getFilename());
             RGBclusters.at(0).setCentroid(image->first,image->second);
+        } else if (TAG==HSV_TAG){
+            auto image = HSVclusterData.find(images.at(randNum).getFilename());
+            HSVclusters.at(0).setCentroid(image->first,image->second);
         }
+
 
         // 1.2 - 1.3
         for (size_t k = 1; k < noClusters; k++){
@@ -457,7 +475,20 @@ namespace LCKMAT002{
                             clusterSet=c;
                         }                                     
                     }           
-                }     
+                }    
+                else if (TAG == HSV_TAG){
+                    auto image = HSVclusterData.find(images.at(i).getFilename());
+                    distance=HSVclusters.at(0).distanceHSV(image->second,HSVclusters.at(0));
+                    int clusterSet=0;          
+                    // Find nearest cluster
+                    for (size_t c = 0; c < k; c++){
+                        double tempDistance=HSVclusters.at(c).distanceHSV(image->second,HSVclusters.at(c));
+                        if (tempDistance<distance){
+                            distance=tempDistance;
+                            clusterSet=c;
+                        }                                     
+                    }           
+                }  
                 cout<<distance<<" ";
                 D2.push_back(distance); 
                 sum+=distance;                          
@@ -495,15 +526,18 @@ namespace LCKMAT002{
             } else if(TAG==RGB_TAG){
                 auto image = RGBclusterData.find(images.at(position).getFilename());
                 RGBclusters.at(k).setCentroid(image->first,image->second);
+            } else if(TAG==HSV_TAG){
+                auto image = HSVclusterData.find(images.at(position).getFilename());
+                HSVclusters.at(k).setCentroid(image->first,image->second);
             }         
             
         }      
         
         // Print results        
-        for (size_t i = 0; i < noClusters; i++){  
-            cout<<"Cluster ["<<i<<"]"<<endl;          
-            if (TAG==PIXEL_INTENSITY_TAG) cout<<PIclusters.at(i).printSet();
-            else if (TAG==RGB_TAG) cout<<RGBclusters.at(i).printSet();
+        for (size_t i = 0; i < noClusters; i++){            
+            if (TAG==PIXEL_INTENSITY_TAG) PIclusters.at(i).printSetAndDistances(PIclusters,i);
+            else if (TAG==RGB_TAG) RGBclusters.at(i).printSetAndDistances(RGBclusters,i);
+            else if (TAG==HSV_TAG) HSVclusters.at(i).printSetAndDistances(HSVclusters,i);
         }
         return true;
     }
@@ -517,7 +551,8 @@ namespace LCKMAT002{
         unordered_map<int,int> initialCentroids = unordered_map<int,int>();
 
         if (TAG==PIXEL_INTENSITY_TAG)cout<<"Initial centroids : "<<endl;
-        else if (TAG==RGB_TAG) cout<<"Initial RGB clusters : "<<endl;
+        else if (TAG==RGB_TAG) cout<<"Initial RGB centroids : "<<endl;
+        else if (TAG==HSV_TAG) cout<<"Initial HSV centroids : "<<endl;
 
         for (size_t i = 0; i < noClusters; i++){
 
@@ -528,7 +563,10 @@ namespace LCKMAT002{
             } else if (TAG==RGB_TAG){
                 RGBClusterSet RGBcluster = RGBClusterSet();
                 RGBclusters.push_back(RGBcluster); 
-            }         
+            } else if (TAG==HSV_TAG){
+                HSVClusterSet HSVcluster = HSVClusterSet();
+                HSVclusters.push_back(HSVcluster); 
+            }        
 
             // Choose initial centroids
             srand(seed); // Seed the time
@@ -544,6 +582,10 @@ namespace LCKMAT002{
             } else if (TAG==RGB_TAG){
                 for (size_t z = 0; z < PIclusters.size(); z++){
                     if (RGBclusters.at(z).getCentroid()==RGBclusterData.find(images.at(randNum).getFilename())->second) identical = true;                    
+                }
+            } else if (TAG==HSV_TAG){
+                for (size_t z = 0; z < PIclusters.size(); z++){
+                    if (HSVclusters.at(z).getCentroid()==HSVclusterData.find(images.at(randNum).getFilename())->second) identical = true;                    
                 }
             }               
             
@@ -561,6 +603,8 @@ namespace LCKMAT002{
                         if (PIclusters.at(z).getCentroid()==clusterData.find(images.at(randNum).getFilename())->second) identical = true;  
                     } else if (TAG==RGB_TAG){
                         if (RGBclusters.at(z).getCentroid()==RGBclusterData.find(images.at(randNum).getFilename())->second) identical = true;
+                    } else if (TAG==HSV_TAG){
+                        if (HSVclusters.at(z).getCentroid()==HSVclusterData.find(images.at(randNum).getFilename())->second) identical = true;
                     }
 
                 }
@@ -571,6 +615,8 @@ namespace LCKMAT002{
                 PIclusters.at(i).setCentroid(images.at(randNum).getFilename(),clusterData.find(images.at(randNum).getFilename())->second); // Assign centroid to set 
             } else if (TAG==RGB_TAG){
                 RGBclusters.at(i).setCentroid(images.at(randNum).getFilename(),RGBclusterData.find(images.at(randNum).getFilename())->second); // Assign centroid to set
+            } else if (TAG==HSV_TAG){
+                HSVclusters.at(i).setCentroid(images.at(randNum).getFilename(),HSVclusterData.find(images.at(randNum).getFilename())->second); // Assign centroid to set
             }
             cout<<randNum<<" "<<images.at(randNum).getFilename()<<","<<endl;              
         }        
@@ -629,6 +675,27 @@ namespace LCKMAT002{
                     moved = true;
                 }
             }
+            // HSV images
+            else if (TAG==HSV_TAG){
+                auto image = HSVclusterData.find(images.at(i).getFilename());
+                double distance=HSVclusters.at(0).distanceHSV(image->second,HSVclusters.at(0));
+                int newClusterSet=0;          
+                // Find nearest cluster
+                for (size_t c = 0; c < HSVclusters.size(); c++){
+                    double tempDistance=HSVclusters.at(c).distanceHSV(image->second,HSVclusters.at(c));
+                    if (tempDistance<distance){
+                        distance=tempDistance;
+                        newClusterSet=c;
+                    }                                     
+                }
+                if(findAndDeleteHSVIterator(image->first,newClusterSet)) {
+                    moved=true;
+                    HSVclusters.at(newClusterSet).add(image->first,image->second);
+                } else if(!HSVclusters.at(newClusterSet).contains(image->first)) {
+                    HSVclusters.at(newClusterSet).add(image->first,image->second); // Image has yet to be added to any of the clusters
+                    moved = true;
+                }
+            }
 
         }
 
@@ -645,12 +712,19 @@ namespace LCKMAT002{
                 RGBclusters.at(i).calcCentroid(); 
                 cout<<endl; 
             }
-        }      
+        }  else if (TAG==HSV_TAG){
+            for (size_t i = 0; i < HSVclusters.size(); i++){
+                HSVclusters.at(i).printSetAndDistances(HSVclusters,i);
+                HSVclusters.at(i).calcCentroid(); 
+                cout<<endl; 
+            }
+        }         
         
 
         //Display number of clusters left
         if (TAG==PIXEL_INTENSITY_TAG) cout<<"Number of cluster left at the end of iteration : "<<PIclusters.size()<<endl;
         else if (TAG==RGB_TAG) cout<<"Number of cluster left at the end of iteration : "<<RGBclusters.size()<<endl;
+        else if (TAG==HSV_TAG) cout<<"Number of cluster left at the end of iteration : "<<HSVclusters.size()<<endl;
         
         // Check that no items where lost during iteration
         int count = 0;
@@ -661,6 +735,11 @@ namespace LCKMAT002{
         } else if (TAG==RGB_TAG){
             for (size_t i = 0; i < RGBclusters.size(); i++){
                 count += RGBclusters.at(i).getSize();
+            }
+        }  
+        else if (TAG==HSV_TAG){
+            for (size_t i = 0; i < HSVclusters.size(); i++){
+                count += HSVclusters.at(i).getSize();
             }
         }       
         cout<<"Number of items in sets "<<count<<endl;
@@ -730,6 +809,26 @@ namespace LCKMAT002{
         
     }
 
+    bool Cluster::findAndDeleteHSVIterator(std::string fileName, int x){
+        bool result = false;
+        for (size_t i = 0; i < HSVclusters.size(); i++){         
+            if (i!=x){
+                result = HSVclusters.at(i).findAndDeleteIterator(fileName);
+                if (result) {
+
+                    if (HSVclusters.at(i).getSize()==0) {
+                        // HSVclusters.erase(HSVclusters.begin()+i); 
+                    }                  
+                    return result;
+                }
+            }              
+                    
+        }
+        return result;
+        
+    }
+
+
     double Cluster::getSpread(int TAG){
         double spread = 0;
         if (TAG==PIXEL_INTENSITY_TAG){
@@ -740,6 +839,11 @@ namespace LCKMAT002{
         else if (TAG==RGB_TAG){
             for (size_t i = 0; i < RGBclusters.size(); i++){
                spread+=RGBclusters.at(i).getSpread();
+            }
+        }
+        else if (TAG==HSV_TAG){
+            for (size_t i = 0; i < HSVclusters.size(); i++){
+               spread+=HSVclusters.at(i).getSpread();
             }
         }
         return spread;
@@ -1297,6 +1401,7 @@ namespace LCKMAT002{
 
         std::vector<Cluster::RGBClusterSet>  rgb = dt.RGBclusters;
         std::vector<Cluster::PixelIntensityClusterSet>  pi = dt.PIclusters;
+        std::vector<Cluster::HSVClusterSet>  hsv = dt.HSVclusters;
 
         if (rgb.size()>0){
             for (size_t i = 0; i < rgb.size(); i++){
@@ -1305,10 +1410,16 @@ namespace LCKMAT002{
                 os<<std::endl;
             }
             
-        } else {
+        } else if (pi.size()>0)  {
             for (size_t i = 0; i < pi.size(); i++){
                 os<<"Cluster "<<i+1<<": ";
                 os<<pi.at(i).printSet();   
+                os<<std::endl;
+            }
+        } else if (hsv.size()>0)  {
+            for (size_t i = 0; i < hsv.size(); i++){
+                os<<"Cluster "<<i+1<<": ";
+                os<<hsv.at(i).printSet();   
                 os<<std::endl;
             }
         }

@@ -134,6 +134,7 @@ namespace LCKMAT002
     
         std::vector<Cluster::PixelIntensityClusterSet> PIclusters; // PI cluster data
         std::vector<Cluster::RGBClusterSet> RGBclusters; // PI cluster data
+        std::vector<Cluster::HSVClusterSet> HSVclusters; // PI cluster data
 
 
         std::vector<double> distancesPI; // keep information of distances for PI
@@ -153,6 +154,7 @@ namespace LCKMAT002
 
         bool findAndDeleteRGB(std::string fileName, int x);    
         bool findAndDeleteRGBIterator(std::string fileName, int x); 
+        bool findAndDeleteHSVIterator(std::string fileName, int x); 
         // void addPI(std::string fileName, std::vector<int> hisogram);
         
 
