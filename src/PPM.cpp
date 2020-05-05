@@ -260,14 +260,19 @@ namespace LCKMAT002 {
             this->ncols=other.ncols;
             this->nrows=other.nrows;
 
+            for (size_t y = 0; y < this->nrows; y++){
+                delete[] this->image[y];
+            }
+            delete[] this->image;
+
             this->image=new PPMPixel*[this->ncols];
             for (size_t y = 0; y < this->nrows; y++){
                 PPMPixel * row = new PPMPixel[ncols];
                 for (size_t x = 0; x < this->ncols; x++)
                 {
-                row[x].red=other.image[y][x].red;
-                row[x].green=other.image[y][x].green;
-                row[x].blue=other.image[y][x].blue;
+                    row[x].red=other.image[y][x].red;
+                    row[x].green=other.image[y][x].green;
+                    row[x].blue=other.image[y][x].blue;
                 }
                 this->image[y]=row;
             }
