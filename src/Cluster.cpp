@@ -52,11 +52,19 @@ namespace LCKMAT002{
             if (fileName.length()>1){
                 LCKMAT002::PPM imageFile(fileName);
                 images.push_back(imageFile);
+                std::random_shuffle ( images.begin(), images.end() );
                 clusterData[imageFile.getFilename()]=vector<int>();                 // Initialise PI Cluster Data   
                 RGBclusterData[imageFile.getFilename()]=vector<vector<int>>();      // Initialise RGB Cluster Data      
                 count++;
             }            
-        }      
+        }    
+        
+        cout<<endl<<"Shuffled images"<<endl;
+        for (size_t i = 0; i < images.size(); i++){
+            cout<<"["<<i<<"] "<<images.at(i).getFilename()<<endl;
+        }
+        
+
         return true;
     }
 

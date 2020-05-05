@@ -148,7 +148,7 @@ namespace LCKMAT002 {
 
     // Move Constructor
     PPM::PPM(PPM&& other) noexcept{
-        // cout<<"Move Constrctor start"<<endl;
+        // cout<<"Move Constructor start"<<endl;
         // *this = std::move(other);  // invoke move assignment operator
         this->fileName=other.fileName;
         this->ncols=other.ncols;
@@ -202,22 +202,45 @@ namespace LCKMAT002 {
 
     // Move Assignment
     PPM& PPM::operator=(PPM&& other) noexcept{
-        // cout<<"Move assignment"<<endl;
+        // cout<<"Move assignment start"<<endl;
         if (this != &other) {
+
             this->fileName=other.fileName;
             this->ncols=other.ncols;
             this->nrows=other.nrows;
 
-            // this->image = other.image;
-            // cout<<"Filename "<<this->fileName<<endl;
-            // cout<<"old lhs "<<&*this->image<<" old rhs "<<&*other.image<<endl;
-            // std::swap(this->image, other.image);
-             for (size_t y = 0; y < this->nrows; y++){
-                this->image[y]=other.image[y];     
-                other.image[y]=nullptr;                          
+            // cout<<"move construvtor "<<this->nrows<<endl;
+
+            this->image=new PPMPixel*[this->ncols];
+            for (size_t y = 0; y < this->nrows; y++){
+                PPMPixel * row = new PPMPixel[ncols];
+                for (size_t x = 0; x < this->ncols; x++)
+                {
+                row[x].red=other.image[y][x].red;
+                row[x].green=other.image[y][x].green;
+                row[x].blue=other.image[y][x].blue;
+                }
+                this->image[y]=row;
             }
-            this->image=other.image;
-            other.image=nullptr;
+
+            // // Working =============================================
+
+            // this->fileName=other.fileName;
+            // this->ncols=other.ncols;
+            // this->nrows=other.nrows;
+
+            // // this->image = other.image;
+            // // cout<<"Filename "<<this->fileName<<endl;
+            // // cout<<"old lhs "<<&*this->image<<" old rhs "<<&*other.image<<endl;
+            // // std::swap(this->image, other.image);
+            //  for (size_t y = 0; y < this->nrows; y++){
+            //     this->image[y]=other.image[y];     
+            //     other.image[y]=nullptr;                          
+            // }
+            // this->image=other.image;
+            // other.image=nullptr;
+
+            // // Working =============================================
 
             // cout<<"new lhs "<<&*this->image<<" new rhs "<<&*other.image<<endl;
             // other.image = nullptr;
@@ -242,7 +265,7 @@ namespace LCKMAT002 {
             // cout<<"Cleared address "<<other.image<<endl;
 
         }       
-
+        // cout<<"Move assignment done"<<endl;
         return *this;
     }
 

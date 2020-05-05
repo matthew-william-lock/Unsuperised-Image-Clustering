@@ -13,6 +13,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <algorithm>    // std::random_shuffle 
 
 
 #define PIXEL_INTENSITY_TAG 0

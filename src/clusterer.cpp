@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
     int clusters = 10;
     int hgramWidth = 1;
     int tag = PIXEL_INTENSITY_TAG;
-    int iterations = 1;
+    int iterations = 10;
     
     int init = K_MEANS_PLUS;
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
     *                  Greyscale is selected by default      
     * 
     * [-it n]       - 'n' represents the number of time k-means will be run so that the spread can be minimised 
-    *                  K-means will run once by default
+    *                  K-means will run 10 times by default
     * 
     * [-init i]     - 'i' represents the method of initalization for k-means
     *                 'cent' for random centroid initalization, 'clust' for assigning images to random clusters, 'plus' for k-means+ method
@@ -160,7 +160,12 @@ int main(int argc, char* argv[]){
 
             cout<<endl<<"===============Creating Cluster and Reading Images==============="<<endl;
 
-            // Finds all the images and stores them as PPM objects
+            /* Read images
+            *
+            * Finds all PPM images in given location
+            * Shuffles images to make sure clustering is not favoured by initial ordering of images
+            */
+           
             if(!cluster.readImages("Gradient_Numbers_PPMS")){
                 cout<<"Error reading images"<<endl;
                 return 1;
